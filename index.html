@@ -1,855 +1,1336 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Infinite Earth: A Structure for Stability</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Earth: A Structure for Stability</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Use Inter as the default font */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* bg-slate-900 */
+        }
+        
+        /* --- Transitions & Animations --- */
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+        .faq-content.open {
+            max-height: 1800px; /* Increased for large diagrams + tax viz */
+            transition: max-height 0.6s ease-in;
+        }
+        .diagram-box {
+            transition: all 0.2s ease-in-out;
+        }
+        .diagram-box:hover {
+            transform: scale(1.03);
+        }
+        .diagram-box.active-box {
+            transform: scale(1.05);
+            opacity: 1;
+        }
+        
+        /* --- Custom Glows & Hovers --- */
+        .hover-glow-blue { box-shadow: 0 0 15px rgba(96, 165, 250, 0); transition: box-shadow 0.2s ease-in-out; }
+        .hover-glow-blue:hover { box-shadow: 0 0 15px rgba(96, 165, 250, 0.4); }
+        .hover-glow-amber { box-shadow: 0 0 15px rgba(251, 191, 36, 0); transition: box-shadow 0.2s ease-in-out; }
+        .hover-glow-amber:hover { box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); }
+        .hover-glow-indigo { box-shadow: 0 0 15px rgba(129, 140, 248, 0); transition: box-shadow 0.2s ease-in-out; }
+        .hover-glow-indigo:hover { box-shadow: 0 0 15px rgba(129, 140, 248, 0.4); }
+        .hover-glow-slate { box-shadow: 0 0 15px rgba(100, 116, 139, 0); transition: box-shadow 0.2s ease-in-out; }
+        .hover-glow-slate:hover { box-shadow: 0 0 15px rgba(100, 116, 139, 0.4); }
+        
+        .active-glow-blue { box-shadow: 0 0 20px rgba(96, 165, 250, 0.5); }
+        .active-glow-amber { box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+        .active-glow-indigo { box-shadow: 0 0 20px rgba(129, 140, 248, 0.5); }
+        .active-glow-slate { box-shadow: 0 0 20px rgba(100, 116, 139, 0.5); }
 
-  <!-- SEO / Social -->
-  <meta name="description" content="Infinite Earth: systems over chaos — a production-tight structure for stability, protection, and clean roll-ups.">
-  <meta name="theme-color" content="#0f172a">
-  <meta property="og:title" content="Infinite Earth — A Structure for Stability">
-  <meta property="og:description" content="Protection and longevity over chaos. Build once, scale clean.">
-  <meta property="og:type" content="website">
-  <!-- Optional: provide this image in your repo root or remove this line -->
-  <meta property="og:image" content="/og-image.png">
-  <meta name="twitter:card" content="summary_large_image">
+        /* --- Panel & Button Styling --- */
+        .info-panel-content strong { color: #fff; }
+        .info-panel-content .chaos { color: #f87171; font-weight: 600; }
+        .info-panel-content .system { color: #4ade80; font-weight: 600; }
 
-  <!-- Tailwind CDN (dev/preview). For true prod, we can swap to a compiled CSS later. -->
-  <script src="https://cdn.tailwindcss.com"></script>
+        /* Money Flow Diagram */
+        .flow-path, .flow-text {
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none; /* Make text non-interactive */
+        }
+        /* Make SVG labels crisp/legible on all DPIs */
+        .flow-text {
+            font-size: 12px;
+            font-weight: 600;
+            fill: #e2e8f0; /* text-slate-200 */
+            paint-order: stroke;            /* stroke drawn under fill */
+            stroke: #0f172a;              /* bg-slate-900 as outline */
+            stroke-width: 2px;            /* subtle halo for contrast */
+            letter-spacing: .1px;
+            text-rendering: optimizeLegibility;
+        }
+        .control-panel .flow-btn {
+            background-color: #334155; /* bg-slate-700 */
+            color: #cbd5e1; /* text-slate-300 */
+            transition: all 0.2s ease-in-out;
+        }
+        .control-panel .flow-btn:hover {
+            background-color: #475569; /* bg-slate-600 */
+            color: #ffffff;
+        }
+        .control-panel .flow-btn.active { /* Style for selected buttons in multi-select */
+            background-color: #2563eb; /* bg-blue-600 */
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+        }
+        /* Specific adjustments for text labels in money flow */
+        #text-rent { transform: translateY(-3px); }
+        #text-loan-repay { transform: translateY(-3px); }
+        #text-loan-out { transform: translateY(3px); }
+        #text-msa { transform: translateX(3px); }
+        #text-profit-ggp { transform: translateY(-3px); }
+        #text-profit-ffc { transform: translateY(3px); }
+        #text-distro { transform: translateX(-3px); }
+        #text-ext-loan { transform: translateX(3px); }
+        
+        /* FAQ Styling */
+        .faq-toggle:hover {
+            background-color: #334155; /* bg-slate-700 */
+        }
+        .faq-toggle.open {
+            background-color: #1e293b; /* bg-slate-800 */
+            border-bottom: 2px solid #2563eb; /* border-blue-600 */
+        }
+        .faq-toggle.open svg {
+            transform: rotate(180deg);
+        }
+        .faq-toggle svg {
+            transition: transform 0.3s ease-in-out;
+        }
+        /* Highlight SMLLC FAQ */
+         .faq-smllc-highlight {
+            border: 2px solid #fbbf24 !important; /* amber-400 */
+         }
+         .faq-smllc-highlight .faq-toggle span {
+            color: #fcd34d !important; /* amber-300 */
+         }
 
-  <!-- Google Font: Inter -->
-<link rel="icon" href="assets/favicon.ico">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="assets/favicon.png" sizes="32x32">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
- <!-- root fallback -->
-=======
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="assets/favicon.png" sizes="32x32">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
->>>>>>> Stashed changes
-<meta name="theme-color" content="#0f172a">
 
+        /* Future Gate Toggle */
+        .gate-btn {
+            background-color: #1d4ed8; /* bg-blue-700 */
+            color: #ffffff;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #3b82f6;
+        }
+        .gate-btn:hover {
+            background-color: #2563eb; /* bg-blue-600 */
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+        }
+        .gate-diagram {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out, transform 0.5s ease-out;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        .gate-diagram.open {
+            max-height: 500px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Decision Guide Styling */
+        .decision-card {
+            background-color: #1e293b; /* bg-slate-800 */
+            border: 2px solid #475569; /* border-slate-600 */
+            transition: all 0.2s ease-in-out;
+        }
+        .decision-card-system {
+            background-color: #1e293b;
+            border: 2px solid #22c55e; /* border-green-500 */
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+        }
+        .decision-card-chaos {
+             border: 2px solid #ef4444; /* border-red-500 */
+             box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+        }
+        .decision-card .consequence-list li {
+            position: relative;
+            padding-left: 1.75rem;
+        }
+        .decision-card .consequence-list li::before {
+            content: '»';
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-weight: bold;
+        }
+        .decision-card-chaos .consequence-list li::before {
+            color: #ef4444; /* text-red-500 */
+        }
+        .decision-card-system .consequence-list li::before {
+             color: #22c55e; /* text-green-500 */
+        }
 
-  <!-- Custom CSS (merged + tightened) -->
-  <style>
-    :root { --ie-bg:#0f172a; }
-    html { scroll-behavior: smooth; }
-    body { font-family:'Inter',sans-serif; background:var(--ie-bg); }
-
-    /* Transitions & Animations */
-    .faq-content{max-height:0;overflow:hidden;transition:max-height .4s ease-out}
-    .faq-content.open{max-height:1800px;transition:max-height .6s ease-in}
-    .diagram-box{transition:all .2s ease-in-out; animation: fadeIn .5s ease-out forwards;}
-    .diagram-box:hover{transform:scale(1.03)}
-    .diagram-box.active-box{transform:scale(1.05);opacity:1}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-
-    /* Glows & Hovers */
-    .hover-glow-blue{box-shadow:0 0 15px rgba(96,165,250,0);transition:box-shadow .2s}
-    .hover-glow-blue:hover{box-shadow:0 0 15px rgba(96,165,250,.4)}
-    .hover-glow-amber{box-shadow:0 0 15px rgba(251,191,36,0);transition:box-shadow .2s}
-    .hover-glow-amber:hover{box-shadow:0 0 15px rgba(251,191,36,.4)}
-    .hover-glow-indigo{box-shadow:0 0 15px rgba(129,140,248,0);transition:box-shadow .2s}
-    .hover-glow-indigo:hover{box-shadow:0 0 15px rgba(129,140,248,.4)}
-    .hover-glow-slate{box-shadow:0 0 15px rgba(100,116,139,0);transition:box-shadow .2s}
-    .hover-glow-slate:hover{box-shadow:0 0 15px rgba(100,116,139,.4)}
-    .active-glow-blue{box-shadow:0 0 20px rgba(96,165,250,.5)}
-    .active-glow-amber{box-shadow:0 0 20px rgba(251,191,36,.5)}
-    .active-glow-indigo{box-shadow:0 0 20px rgba(129,140,248,.5)}
-    .active-glow-slate{box-shadow:0 0 20px rgba(100,116,139,.5)}
-
-    /* Info/Flow controls */
-    .info-panel-content strong{color:#fff}
-    .info-panel-content .chaos{color:#f87171;font-weight:600}
-    .info-panel-content .system{color:#4ade80;font-weight:600}
-    .flow-path,.flow-text{transition:opacity .3s ease-in-out}
-    .flow-text{pointer-events:none}
-    /* Flow labels: outlined + slightly larger so lines don't cut through */
-.flow-text{
-  pointer-events:none;
-  paint-order: stroke fill;
-  stroke:#0f172a;          /* outline color matches page bg */
-  stroke-width:3px;        /* halo thickness */
-  font-weight:600;
-  font-size:11px !important;
-}
-@media (min-width:768px){
-  .flow-text{ font-size:12px !important; }
-}
-    .control-panel .flow-btn{background:#334155;color:#cbd5e1;transition:all .2s;border:1px solid #475569}
-    .control-panel .flow-btn:hover{background:#475569;color:#fff; transform: translateY(-1px); box-shadow:0 2px 4px rgba(0,0,0,.2)}
-    .control-panel .flow-btn.active{background:#2563eb;color:#fff;font-weight:600;border-color:#60a5fa;box-shadow:0 0 10px rgba(96,165,250,.5);transform:none}
-
-    /* FAQ toggles */
-    .faq-toggle:hover{background:#334155}
-    .faq-toggle.open{background:#1e293b;border-bottom:2px solid #2563eb}
-    .faq-toggle.open svg{transform:rotate(180deg)}
-    .faq-toggle svg{transition:transform .3s ease-in-out}
-    .faq-smllc-highlight{border:2px solid #fbbf24 !important}
-    .faq-smllc-highlight .faq-toggle span{color:#fcd34d !important}
-
-    /* Gates */
-    .gate-btn{background:#1d4ed8;color:#fff;transition:all .2s;border:1px solid #3b82f6}
-    .gate-btn:hover{background:#2563eb;box-shadow:0 0 10px rgba(96,165,250,.5); transform: translateY(-1px);}
-    .gate-diagram{max-height:0;overflow:hidden;transition:max-height .5s ease,opacity .5s ease,transform .5s ease;opacity:0;transform:translateY(-10px)}
-    .gate-diagram.open{max-height:560px;opacity:1;transform:translateY(0)}
-
-    /* Decision cards */
-    .decision-card{background:#1e293b;border:2px solid #475569;transition:transform .15s,box-shadow .2s; animation: fadeIn .6s ease-out forwards; animation-delay:.15s;}
-    .decision-card:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.25)}
-    .decision-card-system{border:2px solid #22c55e; box-shadow:0 0 20px rgba(34,197,94,.18)}
-    .decision-card-chaos{border:2px solid #ef4444; box-shadow:0 0 20px rgba(239,68,68,.18)}
-    .decision-card .consequence-list li{position:relative;padding-left:1.5rem}
-    .decision-card .consequence-list li::before{content:'»';position:absolute;left:0;top:0;font-weight:700}
-    .decision-card-chaos .consequence-list li::before{color:#ef4444}
-    .decision-card-system .consequence-list li::before{color:#22c55e}
-    .decision-card-content{flex-grow:1}
-
-    /* A11y / reduced motion */
-    .visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    @media (prefers-reduced-motion:reduce){
-      *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
-      .faq-content.open,.gate-diagram.open{max-height:none}
-    }
-    /* Flow labels: outline so arrows don't cut text */
-.flow-text{
-  pointer-events:none;
-  paint-order: stroke fill;
-  stroke:#0f172a;
-  stroke-width:3px;
-  font-weight:600;
-  font-size:11px !important;
-}
-@media (min-width:768px){ .flow-text{ font-size:12px !important; } }
-
-/* Headings won’t hide under sticky nav when using #links */
-section[id]{ scroll-margin-top:88px; }
-  </style>
+    </style>
 </head>
 <body class="font-sans bg-slate-900 text-gray-300 min-h-screen antialiased selection:bg-blue-500 selection:text-white">
+    
+    <!-- "MY WHY" SECTION -->
+    <section class="mb-16 mt-8 py-8">
+      <div class="max-w-3xl mx-auto bg-slate-800 rounded-lg border-2 border-blue-500 p-6 md:p-10 space-y-6 shadow-2xl shadow-blue-500/20">
+        <h2 class="text-3xl font-bold text-white text-center">My “Why” — The Heart of This Fortress</h2>
+        <p class="text-center text-xl text-gray-200">
+          “My purpose is to help people bring their visions to life so they can live the life they envision—because life is beautiful, and too many people let it pass them by.”
+        </p>
+        <hr class="border-slate-600" />
+        <p class="text-lg text-gray-300">To my partners,</p>
+        <p class="text-lg text-gray-300">
+          This structure isn’t a cage. It’s <strong>armor</strong> that lets us move freely—without fear of one mistake taking everything.
+        </p>
+        <p class="text-lg text-gray-300 bg-slate-900/50 p-4 rounded-md border border-slate-700">
+          A “mom-and-pop” trapped in <em>chaos</em> isn’t free:
+          <br />• Sleepless about one lawsuit wiping us out
+          <br />• Nervous our messy books will spark a “family” fight
+          <br />• Burned out because no one knows who owns what work
+        </p>
+        <p class="text-lg text-gray-200 font-semibold">
+          This is the machine that defeats chaos so we can focus on the craft.
+        </p>
+        <p class="text-lg text-gray-300">
+          Clean books (<strong>FFC</strong>, <strong>GGCG</strong>) prevent fights. Legal bulkheads (<strong>IE</strong>, <strong>MOHV</strong>) remove existential fear. Clear lanes prevent burnout. That’s how we protect the dream and the doers.
+        </p>
+        <p class="text-xl text-center font-semibold text-yellow-300 pt-2">
+          The sword builds wealth. The armor keeps it.
+        </p>
+      </div>
+    </section>
+    
 
-  <!-- "MY WHY" SECTION -->
-  <section class="mb-16 mt-8 py-8">
-    <div class="max-w-3xl mx-auto bg-slate-800 rounded-lg border-2 border-blue-500 p-6 md:p-10 space-y-6 shadow-2xl shadow-blue-500/20">
-      <h2 class="text-3xl font-bold text-white text-center">My 'Why': The Heart of This Fortress</h2>
-      <p class="text-center text-xl text-gray-200">"My purpose is to help people bring their visions to life so they can live the life they envision—because life is beautiful, and too many people let it pass them by."</p>
-      <hr class="border-slate-600" />
-      <p class="text-lg text-gray-300">To my partners,</p>
-      <p class="text-lg text-gray-300">This is why this structure is so important. I know it looks complex. It looks like the opposite of the 'mom-and-pop' freedom we love.</p>
-      <p class="text-lg text-gray-300">But this system is not a <em>cage</em>. It is the <strong>armor</strong> that <em>gives</em> us freedom.</p>
-      <p class="text-lg text-gray-300 bg-slate-900/50 p-4 rounded-md border border-slate-700">A "mom-and-pop" trapped in <em>chaos</em> isn't free.
-        <br />• They can't sleep, worried that one lawsuit will wipe them out.
-        <br />• They can't rest, worried that messy books will lead to a 'family' fight.
-        <br />• They can't enjoy life, because they are <em>trapped</em> by the disorganization, burnout, and fear.
-      </p>
-      <p class="text-lg text-gray-200 font-semibold">That is the chaos that makes us "let life pass us by."</p>
-      <p class="text-lg text-gray-300">This 'systems over chaos' fortress is the "Unwavering Loyalty" that <em>protects</em> our heart <em>and</em> our freedom. The clean books (FFC, GGCG) <em>prevent</em> us from fighting. The legal shields (IE, MOHV) <em>free</em> us from the fear of a lawsuit. The clear roles <em>prevent</em> burnout.</p>
-      <p class="text-xl text-center font-semibold text-yellow-300 pt-4">This fortress is the "how." It's the machine that defeats the chaos, so we can all be free to live the beautiful lives we envision.</p>
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 py-8 md:p-12 max-w-6xl"> <!-- Increased max-width -->
+
+        <!-- Header Section -->
+        <header class="text-center mb-4">
+          <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+            Systems Over Chaos
+          </h1>
+          <p class="text-xl md:text-2xl text-blue-300 max-w-3xl mx-auto">
+            Build the barn before the storm. This structure trades noise for&nbsp;
+            <strong>stability, protection, and clean roll-ups</strong>—so the work today lasts for decades.
+          </p>
+          <!-- Quick-access CTA row -->
+          <div class="mt-4 flex items-center justify-center gap-2">
+            <button id="btn-open-taxes" class="px-4 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-500 border border-indigo-400 shadow">
+              View Tax Implications
+            </button>
+          </div>
+         </header>
+
+        <!-- Interactive Diagram Section -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-white text-center mb-8">Our Structure: An Interactive View</h2>
+            
+            <p class="text-center text-gray-400 mb-6 italic">Tap or click any box to learn about its role.</p>
+
+            <!-- Diagram Container -->
+            <div class="w-full max-w-5xl mx-auto">
+                <!-- Row 1: Infinite Earth (Parent) -->
+                <div class="flex justify-center mb-6">
+                    <div id="diagram-ie" data-target="info-ie" data-glow="blue" class="diagram-box w-3/4 md:w-1/2 bg-blue-800 border-2 border-blue-400 rounded-lg p-5 text-center cursor-pointer hover-glow-blue">
+                        <h3 class="text-2xl font-semibold text-white">Infinite Earth (IE)</h3>
+                        <p class="text-blue-200">The Parent / 6 Members</p>
+                    </div>
+                </div>
+
+                <!-- Connecting Line (visual) -->
+                <div class="w-1 h-8 bg-gray-600 mx-auto"></div>
+                <p class="text-center text-gray-400 mb-2 text-lg font-semibold">Operating Companies (Owned by IE)</p>
+
+                <!-- Row 2: Operating Companies (Owned by IE) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-6">
+                    <!-- Grumpy Goat Pizza -->
+                    <div id="diagram-ggp" data-target="info-ggp" data-glow="slate" class="diagram-box bg-slate-700 border-2 border-slate-500 rounded-lg p-5 text-center cursor-pointer hover-glow-slate">
+                        <h3 class="text-2xl font-semibold text-white">Grumpy Goat (GGP)</h3>
+                        <p class="text-gray-300">The Pizza Co. (Operator)</p>
+                    </div>
+                    <!-- Crumb n Get It -->
+                    <div id="diagram-cng" data-target="info-cng" data-glow="slate" class="diagram-box bg-slate-700 border-2 border-slate-500 rounded-lg p-5 text-center cursor-pointer hover-glow-slate">
+                        <h3 class="text-2xl font-semibold text-white">Crumb n Get It (CNG)</h3>
+                        <p class="text-gray-300">The Bakery Co. (Operator)</p>
+                    </div>
+                    <!-- Fulcrum Fortress -->
+                    <div id="diagram-ffc" data-target="info-ffc" data-glow="slate" class="diagram-box bg-slate-700 border-2 border-slate-500 rounded-lg p-5 text-center cursor-pointer hover-glow-slate">
+                        <h3 class="text-2xl font-semibold text-white">Fulcrum Fortress (FFC)</h3>
+                        <p class="text-gray-300">Shared Support & Systems</p>
+                    </div>
+                </div>
+
+                <!-- Connecting Line (visual) -->
+                <div class="w-1 h-8 bg-gray-600 mx-auto"></div>
+                <p class="text-center text-gray-400 mb-2 text-lg font-semibold">Allied & Specialized Partners</p>
+                
+                <!-- Row 3: Allied & Specialized (Separate Ownership) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 max-w-3xl mx-auto">
+                    <!-- My Okie Heart Ventures -->
+                    <div id="diagram-mohv" data-target="info-mohv" data-glow="amber" class="diagram-box bg-amber-800 border-2 border-amber-400 rounded-lg p-5 text-center cursor-pointer hover-glow-amber">
+                        <h3 class="text-2xl font-semibold text-white">My Okie Heart (MOHV)</h3>
+                        <p class="text-amber-200">Asset Holding (Landlord)</p>
+                    </div>
+                    <!-- Grumpy Goat Capital -->
+                    <div id="diagram-ggcg" data-target="info-ggcg" data-glow="indigo" class="diagram-box bg-indigo-800 border-2 border-indigo-400 rounded-lg p-5 text-center cursor-pointer hover-glow-indigo">
+                        <h3 class="text-2xl font-semibold text-white">Grumpy Goat Capital (GGCG)</h3>
+                        <p class="text-indigo-200">Capital & Funding (Bank)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div id="info-panel-wrapper" class="mt-12">
+                <div id="info-panel" class="bg-slate-800 rounded-lg p-6 md:p-8 min-h-[160px] transition-all duration-300 shadow-xl border-2 border-slate-700 info-panel-content">
+                    <!-- JS will populate this -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits Section -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-white text-center mb-10">What We Get — Today</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Benefit 1: Protection -->
+                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="p-2 bg-green-800/50 rounded-lg mr-4">
+                            <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-white">Serious Asset Protection</h3>
+                    </div>
+                    <p class="text-gray-300 text-lg">
+                      Separate buckets beat single buckets. IE shields people and separates operators; <strong>MOHV</strong> and <strong>GGCG</strong> sit outside IE for an extra wall around the big stuff.
+                    </p>
+                </div>
+
+                <!-- Benefit 2: Tax Simplicity -->
+                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-lg">
+                    <div class="flex items-center mb-4"><div class="p-2 bg-green-800/50 rounded-lg mr-4">
+                        <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 2.25H5.625A1.125 1.125 0 004.5 3.375v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                        </svg>
+                    </div><h3 class="text-2xl font-semibold text-white">Tax Simplicity</h3></div>
+                    <p class="text-gray-300 text-lg">
+                      <strong>GGP</strong>, <strong>CNG</strong>, <strong>FFC</strong> roll up into one IE return. <strong>MOHV</strong> and <strong>GGCG</strong> file their own partnership returns. Clean, predictable, defensible.
+                    </p>
+                </div>
+                
+                <!-- Benefit 3: Stability -->
+                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-lg">
+                    <div class="flex items-center mb-4"><div class="p-2 bg-green-800/50 rounded-lg mr-4">
+                        <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6H7.5m3 0h9.75M3.75 12h16.5M3.75 18h16.5"/>
+                        </svg>
+                    </div><h3 class="text-2xl font-semibold text-white">Role Clarity</h3></div>
+                    <p class="text-gray-300 text-lg">
+                      The Board sets guardrails. Operators run the plays. No double-hats, no governance gridlock.
+                    </p>
+                </div>
+
+                <!-- Benefit 4: Financial Foundation -->
+                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-lg">
+                    <div class="flex items-center mb-4"><div class="p-2 bg-green-800/50 rounded-lg mr-4">
+                        <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div><h3 class="text-2xl font-semibold text-white">Auditable Books</h3></div>
+                    <p class="text-gray-300 text-lg">
+                      Rent to MOHV. Loan to GGCG. MSA to FFC. That’s the whole story. Your bookkeeper will send you a Thank You note.
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- "HOW MONEY MOVES" SECTION (NOW INTERACTIVE) -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-white text-center mb-8">How the Money Moves: An Interactive Flow</h2>
+            
+            <p class="text-center text-gray-400 mb-6 italic">Click buttons to toggle flows on/off. Combine flows!</p>
+            
+            <!-- Interactive Buttons -->
+            <div class="control-panel flex flex-wrap justify-center gap-1 mb-6 p-1 bg-slate-800 border border-slate-700 rounded-lg max-w-lg mx-auto">
+                <button id="btn-flow-all" class="flow-btn active flex-grow px-4 py-2 rounded-md font-medium transition-colors text-sm md:text-base" data-flow-type="all">All Flows</button>
+                <button id="btn-flow-ggp" class="flow-btn flex-grow px-4 py-2 rounded-md font-medium transition-colors text-sm md:text-base" data-flow-type="ggp">GGP/CNG</button>
+                <button id="btn-flow-ffc" class="flow-btn flex-grow px-4 py-2 rounded-md font-medium transition-colors text-sm md:text-base" data-flow-type="ffc">FFC</button>
+                <button id="btn-flow-ggcg" class="flow-btn flex-grow px-4 py-2 rounded-md font-medium transition-colors text-sm md:text-base" data-flow-type="ggcg">GGCG</button>
+                <button id="btn-flow-mohv" class="flow-btn flex-grow px-4 py-2 rounded-md font-medium transition-colors text-sm md:text-base" data-flow-type="mohv">MOHV</button>
+                <button id="btn-flow-ie" class="flow-btn flex-grow px-4 py-2 rounded-md font-medium transition-colors text-sm md:text-base" data-flow-type="ie">IE</button>
+            </div>
+
+            <!-- NEW INTERACTIVE SVG DIAGRAM -->
+            <div class="w-full max-w-5xl mx-auto p-4 bg-slate-800 rounded-lg border border-slate-700 shadow-lg">
+                <svg width="100%" viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif" font-size="10" preserveAspectRatio="xMidYMid meet">
+                    <!-- Column Titles -->
+                    <text x="75" y="20" fill="#cbd5e1" font-weight="bold" text-anchor="middle">OPERATORS</text>
+                    <text x="250" y="20" fill="#cbd5e1" font-weight="bold" text-anchor="middle">ALLIED PARTNERS</text>
+                    <text x="500" y="20" fill="#cbd5e1" font-weight="bold" text-anchor="middle">THE PARENT</text>
+                    
+                    <!-- Main Boxes -->
+                    <g id="box-ggp">
+                        <rect x="25" y="110" width="100" height="40" rx="5" fill="#334155" stroke="#64748b" stroke-width="1.5"/>
+                        <text x="75" y="135" fill="#f1f5f9" text-anchor="middle" font-weight="600">GGP / CNG</text>
+                    </g>
+                    <g id="box-ffc">
+                        <rect x="25" y="180" width="100" height="40" rx="5" fill="#334155" stroke="#64748b" stroke-width="1.5"/>
+                        <text x="75" y="205" fill="#f1f5f9" text-anchor="middle" font-weight="600">FFC (Support)</text>
+                    </g>
+                    <g id="box-mohv">
+                        <rect x="200" y="40" width="100" height="40" rx="5" fill="#7c2d12" stroke="#fb923c" stroke-width="1.5"/>
+                        <text x="250" y="65" fill="#f1f5f9" text-anchor="middle" font-weight="600">MOHV (Landlord)</text>
+                    </g>
+                    <g id="box-ggcg">
+                        <rect x="200" y="110" width="100" height="40" rx="5" fill="#4338ca" stroke="#818cf8" stroke-width="1.5"/>
+                        <text x="250" y="135" fill="#f1f5f9" text-anchor="middle" font-weight="600">GGCG (Bank)</text>
+                    </g>
+                    <g id="box-bank">
+                        <rect x="200" y="250" width="100" height="40" rx="5" fill="#9a3412" stroke="#fdba74" stroke-width="1.5"/>
+                        <text x="250" y="275" fill="#f1f5f9" text-anchor="middle" font-weight="600">External Bank</text>
+                    </g>
+                    <g id="box-ie">
+                        <rect x="450" y="110" width="100" height="40" rx="5" fill="#1d4ed8" stroke="#60a5fa" stroke-width="1.5"/>
+                        <text x="500" y="135" fill="#f1f5f9" text-anchor="middle" font-weight="600">Infinite Earth</text>
+                    </g>
+                    <g id="box-members">
+                        <rect x="450" y="250" width="100" height="40" rx="5" fill="#065f46" stroke="#34d399" stroke-width="1.5"/>
+                        <text x="500" y="275" fill="#f1f5f9" text-anchor="middle" font-weight="600">6 Members</text>
+                    </g>
+
+                    <!-- Arrows and Labels -->
+                    <!-- 1. Rent -->
+                    <g class="flow-path" data-flow="ggp mohv">
+                        <path id="flow-rent" d="M 130 130 Q 165 110 195 80" stroke="#fb923c" stroke-width="2" fill="none" marker-end="url(#arrowhead-amber)"/>
+                        <text id="text-rent" class="flow-text" x="162" y="100" fill="#fb923c" font-weight="500" text-anchor="middle">1. Rent Payment</text>
+                    </g>
+                    <!-- 2. Loan -->
+                    <g class="flow-path" data-flow="ggp ggcg">
+                        <path id="flow-loan-repay" d="M 130 130 H 195" stroke="#818cf8" stroke-width="2" fill="none" marker-end="url(#arrowhead-indigo)"/>
+                        <text id="text-loan-repay" class="flow-text" x="162" y="125" fill="#818cf8" font-weight="500" text-anchor="middle">2. Loan Repay</text>
+                        
+                        <path id="flow-loan-out" d="M 195 140 H 130" stroke="#818cf8" stroke-width="2" fill="none" marker-end="url(#arrowhead-indigo-rev)"/>
+                        <text id="text-loan-out" class="flow-text" x="162" y="150" fill="#818cf8" font-weight="500" text-anchor="middle">Loan Capital</text>
+                    </g>
+                    <!-- 3. MSA Fee -->
+                    <g class="flow-path" data-flow="ggp ffc">
+                        <path id="flow-msa" d="M 85 155 V 175" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowhead-slate)"/>
+                        <text id="text-msa" class="flow-text" x="85" y="165" fill="#94a3b8" font-weight="500" text-anchor="middle" writing-mode="vertical-rl" transform="rotate(180 85 165)">3. Service Fee</text>
+                    </g>
+                    <!-- 4. Profit (GGP/CNG) -->
+                    <g class="flow-path" data-flow="ggp ie">
+                        <path id="flow-profit-ggp" d="M 130 130 Q 290 100 445 125" stroke="#60a5fa" stroke-width="2" fill="none" marker-end="url(#arrowhead-blue)"/>
+                        <text id="text-profit-ggp" class="flow-text" x="290" y="115" fill="#60a5fa" font-weight="500" text-anchor="middle">4. GGP/CNG Profit</text>
+                    </g>
+                    <!-- 4b. Profit (FFC) -->
+                    <g class="flow-path" data-flow="ffc ie">
+                        <path id="flow-profit-ffc" d="M 130 200 Q 290 160 445 145" stroke="#60a5fa" stroke-width="2" fill="none" marker-end="url(#arrowhead-blue)"/>
+                        <text id="text-profit-ffc" class="flow-text" x="290" y="170" fill="#60a5fa" font-weight="500" text-anchor="middle">4. FFC Profit</text>
+                    </g>
+                    <!-- 5. Distributions -->
+                    <g class="flow-path" data-flow="ie">
+                        <path id="flow-distro" d="M 500 155 V 245" stroke="#34d399" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+                        <text id="text-distro" class="flow-text" x="500" y="200" fill="#34d399" font-weight="500" text-anchor="middle" writing-mode="vertical-rl" transform="rotate(180 500 200)">5. Distributions</text>
+                    </g>
+                    <!-- 6. External Loan -->
+                    <g class="flow-path" data-flow="ggcg">
+                        <path id="flow-ext-loan" d="M 250 245 V 155" stroke="#fdba74" stroke-width="2" marker-end="url(#arrowhead-orange)"/>
+                        <text id="text-ext-loan" class="flow-text" x="250" y="200" fill="#fdba74" font-weight="500" text-anchor="middle" writing-mode="vertical-rl" transform="rotate(180 250 200)">Ext. Bank Loan</text>
+                    </g>
+
+                    <!-- Arrowhead Definitions -->
+                    <defs>
+                        <marker id="arrowhead-amber" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#fb923c" /></marker>
+                        <marker id="arrowhead-indigo" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#818cf8" /></marker>
+                        <marker id="arrowhead-indigo-rev" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#818cf8" /></marker>
+                        <marker id="arrowhead-slate" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8" /></marker>
+                        <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#60a5fa" /></marker>
+                        <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#34d399" /></marker>
+                        <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#fdba74" /></marker>
+                    </defs>
+                </svg>
+            </div>
+            
+            <div class="max-w-3xl mx-auto bg-slate-800 rounded-lg border border-slate-700 p-6 md:p-8 space-y-6 shadow-lg mt-8">
+                <p class="text-center text-lg text-gray-300">
+                  Every dollar has a job and a clean, arm’s-length path.
+                </p>
+                <div class="space-y-4">
+                  <!-- Flow 1 -->
+                  <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-amber-600 rounded-full flex items-center justify-center text-xl font-bold text-white">1</div>
+                    <div>
+                      <h3 class="text-xl font-semibold text-amber-300">Rent / Lease</h3>
+                      <p class="text-gray-300 text-base md:text-lg">
+                        Operators (<strong class="text-white">GGP</strong>, <strong class="text-white">CNG</strong>) pay <strong class="text-white">MOHV</strong> for buildings and high-risk equipment. Assets live outside ops liability.
+                      </p>
+                    </div>
+                  </div>
+                  <!-- Flow 2 -->
+                  <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-indigo-600 rounded-full flex items-center justify-center text-xl font-bold text-white">2</div>
+                    <div>
+                      <h3 class="text-xl font-semibold text-indigo-300">Debt & Capital</h3>
+                      <p class="text-gray-300 text-base md:text-lg">
+                        Operators repay <strong class="text-white">GGCG</strong> (formal intercompany loans). Banks see compartments; covenants stay clean.
+                      </p>
+                    </div>
+                  </div>
+                  <!-- Flow 3 -->
+                  <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-slate-600 rounded-full flex items-center justify-center text-xl font-bold text-white">3</div>
+                    <div>
+                      <h3 class="text-xl font-semibold text-slate-300">Shared Services (MSA)</h3>
+                      <p class="text-gray-300 text-base md:text-lg">
+                        <strong class="text-white">FFC</strong> handles finance, HR, ops playbooks, vendor leverage. Solve once, share everywhere.
+                      </p>
+                    </div>
+                  </div>
+                  <!-- Flow 4 -->
+                  <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-blue-600 rounded-full flex items-center justify-center text-xl font-bold text-white">4</div>
+                    <div>
+                      <h3 class="text-xl font-semibold text-blue-300">Profit Roll-Up</h3>
+                      <p class="text-gray-300 text-base md:text-lg">
+                        After bills, profits from <strong class="text-white">GGP</strong>, <strong class="text-white">CNG</strong>, and <strong class="text-white">FFC</strong> flow into <strong class="text-white">IE</strong>.
+                      </p>
+                    </div>
+                  </div>
+                  <!-- Flow 5 -->
+                  <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-green-600 rounded-full flex items-center justify-center text-xl font-bold text-white">5</div>
+                    <div>
+                      <h3 class="text-xl font-semibold text-green-300">Member Distributions</h3>
+                      <p class="text-gray-300 text-base md:text-lg">
+                        <strong class="text-white">IE</strong> distributes to the <strong class="text-white">6 Members</strong> by the Operating Agreement. No mystery, no mixing.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- "SWORD & ARMOR" SECTION -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-white text-center mb-10">The Sword & The Armor</h2>
+            <div class="max-w-3xl mx-auto bg-slate-800 rounded-lg border-2 border-yellow-400 p-6 md:p-8 space-y-6 shadow-xl shadow-yellow-500/20">
+              <p class="text-center text-2xl text-yellow-300 font-semibold">Create wealth. Protect it. Pass it on.</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-slate-700/70 p-5 rounded-lg border border-slate-600">
+                  <h3 class="text-2xl font-semibold text-white mb-3">The Sword</h3>
+                  <p class="text-gray-300"><strong class="text-white">Operators (GGP, CNG, FFC)</strong> chase growth and excellence. Fast lanes. Clear targets.</p>
+                </div>
+                <div class="bg-slate-700/70 p-5 rounded-lg border border-slate-600">
+                  <h3 class="text-2xl font-semibold text-white mb-3">The Armor</h3>
+                  <p class="text-gray-300"><strong class="text-white">IE, MOHV, GGCG</strong> keep risk, assets, and debt in their lanes. The system feels “heavy” until the day it saves your life.</p>
+                </div>
+              </div>
+              <hr class="border-slate-600" />
+              <h3 class="text-xl font-semibold text-white">The three killers of generational wealth—and our countermeasures:</h3>
+              <ul class="space-y-4 text-gray-300 text-lg">
+                <li><span class="text-red-400 font-bold">External attacks:</span> Lawsuits → <span class="text-green-400 font-semibold">LLCs + asset separation</span></li>
+                <li><span class="text-red-400 font-bold">Internal chaos:</span> Infighting → <span class="text-green-400 font-semibold">Clean money trails + clear roles</span></li>
+                <li><span class="text-red-400 font-bold">Failed succession:</span> Sudden change → <span class="text-green-400 font-semibold">Trusts that lock the rules</span></li>
+              </ul>
+              <blockquote class="border-l-4 border-yellow-400 p-4 bg-slate-700 rounded-r-lg">
+                <p class="text-xl md:text-2xl font-semibold text-white italic">
+                  “The sword makes <span class="text-yellow-300">us</span> rich. The armor makes our <span class="text-yellow-300">grandkids</span> rich.”
+                </p>
+              </blockquote>
+            </div>
+        </section>
+
+
+        <!-- ANALOGY SECTION -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-white text-center mb-10">A Simple Analogy: The Farm Co-op</h2>
+            <div class="max-w-3xl mx-auto bg-slate-800 rounded-lg border border-slate-700 p-6 md:p-8 space-y-6 shadow-xl">
+              <p class="text-center text-lg text-gray-300">Not one farm—an allied co-op that survives winter and scales in harvest.</p>
+              <div class="space-y-4">
+                <div><h3 class="text-xl font-semibold text-blue-300">1) The Farm (IE)</h3><p class="text-gray-300 text-lg">Owned by all 6. Sets the rules of the land; keeps fields separated.</p></div>
+                <div><h3 class="text-xl font-semibold text-blue-300">2) The Almanac (FFC)</h3><p class="text-gray-300 text-lg">The playbook everyone uses—plant once, teach many.</p></div>
+                <div><h3 class="text-xl font-semibold text-blue-300">3) The Barn & Bank (MOHV / GGCG)</h3><p class="text-gray-300 text-lg">Holds the tractor and manages the note. Operators rent/borrow—no mixing.</p></div>
+                <div><h3 class="text-xl font-semibold text-blue-300">4) Repeatable Rows</h3><p class="text-gray-300 text-lg">Hogcreek / Poggio Ross prove the pattern. Copy, don’t improvise.</p></div>
+              </div>
+            </div>
+        </section>
+
+        <!-- FAQ / Common Objections Section -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-white text-center mb-10">Your Questions Answered</h2>
+            <div class="max-w-3xl mx-auto space-y-4">
+
+                <!-- FAQ 1 (Hogcreek/MOHV) -->
+                <div class="bg-slate-800 rounded-lg border-2 border-yellow-400 overflow-hidden shadow-xl shadow-yellow-500/20">
+                    <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="hogcreek">
+                        <span class="text-xl font-semibold text-yellow-300">What about MOHV, GGCG, and Hogcreek Customs?</span>
+                        <svg class="faq-icon w-6 h-6 text-yellow-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="faq-content">
+                        <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
+                          <p>Adding another owner turns GGP into a partnership with a separate Form 1065 and K-1s. We lose the single roll-up and add governance noise. Keeping GGP as an IE SMLLC preserves simplicity.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- FAQ 2 (Legal/Laundering) -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
+                    <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="legal">
+                        <span class="text-xl font-semibold text-white">Is this structure legal? Is this money laundering?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="faq-content">
+                        <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
+                            <p><strong class="text-white">Yes, legal.</strong> Laundering hides illegal sources. We’re organizing <em>legal</em> revenue with arm’s-length documents (leases, MSAs, notes) and clean books. Easier to audit, easier to defend.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 3 (The Bank) -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
+                    <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="bank">
+                        <span class="text-xl font-semibold text-white">Won't the bank ask questions about this?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="faq-content">
+                        <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
+                            <p>Banks prefer clarity. Debt sits in <strong class="text-white">GGCG</strong>, assets in <strong class="text-white">MOHV</strong>, operations in their lanes. Risk is easier to underwrite, not harder.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 4 (We Never Said) -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
+                    <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="why-llcs">
+                        <span class="text-xl font-semibold text-white">We never said we were going to use all these LLCs...</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="faq-content">
+                        <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
+                            <p>This is the "how" for the "what" we all agreed on. We all agreed to build a *real, lasting, protected business*.</p>
+                            <p>These LLCs are not "extra" complexity; they are the *legal containers* for the pieces we already have. We have:
+                                <br>• An Operating Business (GGP)
+                                <br>• Valuable Assets (MOHV)
+                                <br>• A Major Loan (GGCG)
+                            </p>
+                            <p>Using separate LLCs is the *standard, correct* way to protect these pieces from each other. In the "Farm" analogy, we agreed to build a house; these are the foundation, the walls, and the roof. They aren't "extras"—they're the *required parts* to do it right.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FAQ 5 (GGCG Future) -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
+                    <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="ggcg-future">
+                        <span class="text-xl font-semibold text-white">Won't we just dissolve GGCG after the loan is repaid?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="faq-content">
+                        <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
+                            <p>This is a key part of our "longevity" plan. GGCG is *not* a temporary, "one-and-done" entity. It's the *start* of our internal financial system.</p>
+                            <p>Think of it as our permanent "Farm Co-op Bank."
+                                <br>• **Job 1 (Today):** Handle this first major bank loan.
+                                <br>• **Job 2 (Future):** When GGP wants a new truck, or CNG needs a new oven, where does the money come from? Instead of begging an external bank, we can use *our own* internal bank (GGCG) to fund it.
+                            </p>
+                            <p>GGCG is a *permanent* piece of our infrastructure. It's the "Bank" that will manage capital and fund new projects for our *entire group* for decades to come.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 7 (MOHV/GGCG) -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
+                    <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="landlord">
+                        <span class="text-xl font-semibold text-white">What's the point of MOHV and GGCG? (Landlord/Bank)</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="faq-content">
+                        <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
+                            <p>This separates *Operations* from *Assets* and *Capital*.</p>
+                            <p><strong class="text-white">1. MOHV (The Landlord):</strong> Owns the expensive physical assets (building, truck). It then *leases* them to GGP.</p>
+                            <p><strong class="text-white">2. GGCG (The Bank):</strong> Secures the primary loan/capital. It then makes a formal "intercompany loan" to GGP.</p>
+                            <p><strong class="text-white">The Benefit (Total Asset Isolation):</strong> If GGP (the *Operator*) is sued, the plaintiff *cannot* seize the building or the truck, because GGP doesn't own them! This protects our most valuable assets.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 8 (Shields) -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
+                    <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="shields">
+                        <span class="text-xl font-semibold text-white">What are the different "shields" of protection?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="faq-content">
+                        <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
+                            <p>This structure provides multiple layers of protection. </p>
+                            <p><strong class="text-white">1. The Personal Shield (IE):</strong> Protects all 6 members' *personal* assets (house, car) from *all* business debts.</p>
+                            <p><strong class="text-white">2. The Inter-Business Shield (IE):</strong> Protects our businesses *from each other*. A lawsuit against GGP cannot drain CNG's bank account.</p>
+                            <p><strong class="text-white">3. The Asset Shield (MOHV):</strong> Protects our *valuable assets* (building, truck) from *operational* lawsuits by using a separate "Landlord" company.</p>
+                            <p><strong class="text-white">4. The Ownership Shield (MOHV/GGCG):</strong> The *ultimate* shield. Because IE doesn't own MOHV, its assets are protected by an impenetrable wall of separate ownership.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FAQ 9 (Units & DBA) -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
+                    <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="units">
+                        <span class="text-xl font-semibold text-white">Why would GGP need *more* LLCs for its truck and store?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="faq-content">
+                        <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
+                            <p>This is the **Operational Shield**. The food truck is a high-risk asset. By making it `GGP Unit 01, LLC` (owned 100% by GGP), you put a bulkhead around it. If the truck is sued, the lawsuit stops *at the truck*. It cannot "climb up" to seize GGP's main bank account.</p>
+                            <p>That `GGP Unit 01, LLC` then files a DBA ("Doing Business As") to *call itself* "Grumpy Goat Pizza - Truck" in public.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 10 (Taxes) -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
+                    <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="taxes">
+                        <span class="text-xl font-semibold text-white">What are the *specific* tax benefits?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="faq-content">
+                        <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
+                            <p>It's about *clarity* and *correctness*.
+                            <br>• IE (6 owners) files one partnership return (Form 1065).
+                            <br>• GGP, CNG, & FFC (owned 100% by IE) are "disregarded" and *roll up* into IE's return. **This is the main simplicity.**
+                            <br>• MOHV & GGCG (4 owners) file their *own* separate partnership returns. This is legally correct and keeps their finances separate from IE's.
+                            </p>
+                            <p>This system is far simpler and cheaper than the alternative of 7-8+ separate, chaotic partnership returns.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FAQ 11 (Control) -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
+                    <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="control">
+                        <span class="text-xl font-semibold text-white">How do 6 members "control" this without chaos?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.S.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="faq-content">
+                        <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
+                            <p>This structure *prevents* chaos by defining clear roles. <br>
+                            1. **The 6 Members (Owners)** act as the Board of Infinite Earth.<br>
+                            2. **The Board** sets the high-level "guardrails": the group-wide budget, the core values, and the overall strategy for the companies *it owns* (GGP, CNG, FFC).<br>
+                            3. **The Business Leaders** (at GGP, CNG, FFC) run their day-to-day operations *within* those guardrails. </p>
+                            <p>The Board doesn't decide on pizza toppings. The GGP leader doesn't decide on the group's bank. This is "systems over chaos" in practice.</p>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 12 (Setup) -->
+                <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
+                    <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="setup">
+                        <span class="text-xl font-semibold text-white">This seems like more setup paperwork.</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="faq-content">
+                        <div class="p-5 pt-0 text-gray-300 text-lg">
+                            <p>It's more setup *once* for far less complexity *forever*. The alternative (6+ separate partnerships) is a nightmare of duplicate bank accounts, insurance policies, and tax filings *every single year*. This structure is a "do it right, do it once" system that saves massive headaches long-term.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- "TO BE FORMED" SECTION (NOW INTERACTIVE) -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-white text-center mb-10">The Future Gates of the Fortress</h2>
+            <div class="max-w-3xl mx-auto bg-slate-800 rounded-lg border-2 border-blue-400 p-6 md:p-8 space-y-6 shadow-xl shadow-blue-500/20">
+                <p class="text-center text-lg text-gray-300">
+                    <strong class="text-white">When do we build these gates?</strong> This isn't about expansion. We build the next gate when the *chaos* of *not* having it becomes a bigger threat than the "hassle" of building it.
+                </p>
+
+                <hr class="border-slate-600">
+                
+                <div class="space-y-8">
+                    
+                    <!-- GATE 1 (THE NEXT STEP): THE LEGACY FORTRESS -->
+                    <div>
+                        <h3 class="text-2xl font-semibold text-blue-300 mb-4">Gate 1 (The Next Urgent Step): The Legacy Fortress</h3>
+                        
+                        <blockquote class="border-l-4 border-yellow-400 p-4 bg-slate-700/70 rounded-r-lg mb-5">
+                            <p class="font-semibold text-yellow-300 text-lg">Why this is the priority:</p>
+                            <p class="text-gray-200 mt-1 text-lg">The other gates protect us from *outsiders*. This is the armor that protects the "family" *from itself*. It's the "Generational Law" that fulfills the promise of sustaining wealth.</p>
+                        </blockquote>
+
+                        <p class="text-gray-300 text-lg mb-4">
+                            <strong class="text-white">The "Chaos" Trigger:</strong> We build this armor the moment the business is *valuable enough to fight over*. It's the only defense against the **"4 D's"** that destroy "mom-and-pop" partnerships:
+                            <br>• <strong class="text-red-400">D</strong>eath (Who inherits the shares? Does a spouse get a vote?)
+                            <br>• <strong class="text-red-400">D</strong>ivorce (A court orders a partner's shares given to an ex.)
+                            <br>• <strong class="text-red-400">D</strong>isability (Who votes for an incapacitated partner?)
+                            <br>• <strong class="text-red-400">D</strong>isagreement (How do we buy out a partner who wants to leave?)
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <svg class="w-7 h-7 text-teal-300 flex-shrink-0 mt-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                                <div>
+                                    <strong class="text-white text-lg">`Business Trust` (The Generational Law):</strong>
+                                    <p class="text-gray-300 text-base md:text-lg">This is the armor that *sustains* the wealth. It's a "law carved in stone" that answers all the "4 D's." If a partner is sued *personally* or gets divorced, the Trust's "gate" slams shut, protecting the fortress from their personal drama.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- NEW "Show Fortress" Button -->
+                            <button id="btn-show-trust" class="gate-btn text-sm px-4 py-2 rounded-md font-semibold transition-colors flex items-center gap-2">
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                <span id="btn-text-trust">Show Fortress Diagram</span>
+                            </button>
+                            <div id="diagram-trust" class="gate-diagram mt-4 bg-slate-700 p-4 rounded-lg border border-slate-600">
+                                <svg width="100%" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif" font-size="10">
+                                    <rect x="10" y="10" width="380" height="280" rx="15" fill="#334155" stroke="#60a5fa" stroke-width="4"/>
+                                    <text x="200" y="35" fill="#60a5fa" font-weight="bold" text-anchor="middle" font-size="14">THE BUSINESS TRUST (Generational Law)</text>
+                                    
+                                    <!-- Fortress Wall -->
+                                    <path d="M 10 50 H 390" stroke="#60a5fa" stroke-width="4" />
+                                    <path d="M 40 50 V 40 H 50 V 50" stroke="#60a5fa" stroke-width="4" fill="#334155" />
+                                    <path d="M 80 50 V 40 H 90 V 50" stroke="#60a5fa" stroke-width="4" fill="#334155" />
+                                    <path d="M 120 50 V 40 H 130 V 50" stroke="#60a5fa" stroke-width="4" fill="#334155" />
+                                    <path d="M 160 50 V 40 H 170 V 50" stroke="#60a5fa" stroke-width="4" fill="#334155" />
+                                    <path d="M 200 50 V 40 H 210 V 50" stroke="#60a5fa" stroke-width="4" fill="#334155" />
+                                    <path d="M 240 50 V 40 H 250 V 50" stroke="#60a5fa" stroke-width="4" fill="#334155" />
+                                    <path d="M 280 50 V 40 H 290 V 50" stroke="#60a5fa" stroke-width="4" fill="#334155" />
+                                    <path d="M 320 50 V 40 H 330 V 50" stroke="#60a5fa" stroke-width="4" fill="#334155" />
+                                    <path d="M 360 50 V 40 H 370 V 50" stroke="#60a5fa" stroke-width="4" fill="#334155" />
+
+                                    <!-- Protected Assets Inside -->
+                                    <text x="200" y="75" fill="#cbd5e1" font-weight="bold" text-anchor="middle" font-size="12">PROTECTED PARTNERS & ASSETS</text>
+                                    <rect x="50" y="90" width="300" height="130" rx="10" fill="#1e293b" stroke="#475569"/>
+                                    <text x="200" y="110" fill="#f1f5f9" text-anchor="middle" font-weight="semibold">IE / MOHV / GGCG / Poggio Ross</text>
+                                    <text x="200" y="130" fill="#f1f5f9" text-anchor="middle" font-weight="semibold">GGP / CNG / Hogcreek</text>
+                                    <text x="200" y="150" fill="#f1f5f9" text-anchor="middle" font-weight="semibold">TimeVault (IP)</text>
+                                    <text x="200" y="170" fill="#f1f5f9" text-anchor="middle" font-weight="semibold">Partner Shares</text>
+                                    <text x="200" y="200" fill="#34d399" text-anchor="middle" font-weight="bold" font-size="12">FORTRESS IS SECURE</text>
+                                    
+                                    <!-- Bouncing Threats -->
+                                    <g>
+                                        <text x="60" y="250" fill="#f87171" font-weight="bold" text-anchor="middle">Divorce</text>
+                                        <path d="M 60 240 V 225" stroke="#f87171" stroke-width="2" marker-end="url(#arrowhead-red)"/>
+                                        <path d="M 60 225 L 40 245" stroke="#f87171" stroke-width="2"/>
+                                        <path d="M 60 225 L 80 245" stroke="#f87171" stroke-width="2"/>
+                                    </g>
+                                    <g>
+                                        <text x="130" y="270" fill="#f87171" font-weight="bold" text-anchor="middle">Death</text>
+                                        <path d="M 130 260 V 225" stroke="#f87171" stroke-width="2" marker-end="url(#arrowhead-red)"/>
+                                        <path d="M 130 225 L 110 245" stroke="#f87171" stroke-width="2"/>
+                                        <path d="M 130 225 L 150 245" stroke="#f87171" stroke-width="2"/>
+                                    </g>
+                                    <g>
+                                        <text x="200" y="250" fill="#f87171" font-weight="bold" text-anchor="middle">Disability</text>
+                                        <path d="M 200 240 V 225" stroke="#f87171" stroke-width="2" marker-end="url(#arrowhead-red)"/>
+                                        <path d="M 200 225 L 180 245" stroke="#f87171" stroke-width="2"/>
+                                        <path d="M 200 225 L 220 245" stroke="#f87171" stroke-width="2"/>
+                                    </g>
+                                    <g>
+                                        <text x="270" y="270" fill="#f87171" font-weight="bold" text-anchor="middle">Disagreement</text>
+                                        <path d="M 270 260 V 225" stroke="#f87171" stroke-width="2" marker-end="url(#arrowhead-red)"/>
+                                        <path d="M 270 225 L 250 245" stroke="#f87171" stroke-width="2"/>
+                                        <path d="M 270 225 L 290 245" stroke="#f87171" stroke-width="2"/>
+                                    </g>
+                                    <g>
+                                        <text x="340" y="250" fill="#f87171" font-weight="bold" text-anchor="middle">Personal Lawsuit</text>
+                                        <path d="M 340 240 V 225" stroke="#f87171" stroke-width="2" marker-end="url(#arrowhead-red)"/>
+                                        <path d="M 340 225 L 320 245" stroke="#f87171" stroke-width="2"/>
+                                        <path d="M 340 225 L 360 245" stroke="#f87171" stroke-width="2"/>
+                                    </g>
+                                    
+                                    <defs>
+                                        <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                            <polygon points="0 0, 10 3.5, 0 7" fill="#f87171" />
+                                        </marker>
+                                    </defs>
+                                </svg>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <svg class="w-7 h-7 text-teal-300 flex-shrink-0 mt-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h6M9 11.25h6M9 15.75h6" /></svg>
+                                <div>
+                                    <strong class="text-white text-lg">`C-Corporation` (A Later Tool):</strong>
+                                    <p class="text-gray-300 text-base md:text-lg">This is *not* for outside investors. It's a high-level tool we might *never* need, used only for complex tax strategies if the group retains millions in profits. It's not a priority.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="border-slate-600">
+
+                    <!-- GATE 2: THE BRAND & IP FORTRESS -->
+                    <div>
+                        <h3 class="text-2xl font-semibold text-blue-300 mb-4">Gate 2 (Proactive Armor): The Brand Fortress</h3>
+
+                        <blockquote class="border-l-4 border-yellow-400 p-4 bg-slate-700/70 rounded-r-lg mb-5">
+                            <p class="font-semibold text-yellow-300 text-lg">Why this is the next step:</p>
+                            <p class="text-gray-200 mt-1 text-lg">This gate protects our "crown jewels"—the brand names, recipes, and systems. A lawsuit against GGP *cannot* seize the GGP *brand* if GGP doesn't *own* it.</p>
+                        </blockquote>
+
+                        <p class="text-gray-300 text-lg mb-4">
+                            <strong class="text-white">The "Chaos" Trigger:</strong> We build this gate the moment our *brand* has provable value—when the *name* "Grumpy Goat Pizza" or the "FFC Playbook" is as valuable as the truck itself.
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <svg class="w-7 h-7 text-teal-300 flex-shrink-0 mt-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                                <div>
+                                    <strong class="text-white text-lg">`TimeVault, LLC` (The Vault):</strong>
+                                    <p class="text-gray-300 text-base md:text-lg">Its *only* job is to be the unbreakable vault that legally *owns* the "crown jewels" (our IP). It does nothing else.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <svg class="w-7 h-7 text-teal-300 flex-shrink-0 mt-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <div>
+                                    <strong class="text-white text-lg">`Guardian Marks, LLC` (The Guardian):</strong>
+                                    <p class="text-gray-300 text-base md:text-lg">This is the *Guardian of the Gate*. It *licenses* the IP from the Vault to the Operators (like GGP) and enforces *quality control*. This is how we ensure the brand is never weakened or stolen.</p>
+                                </div>
+                            </div>
+                            <!-- NEW "Show IP Flow" Button -->
+                            <button id="btn-show-ip" class="gate-btn text-sm px-4 py-2 rounded-md font-semibold transition-colors flex items-center gap-2">
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                <span id="btn-text-ip">Show IP Flow Diagram</span>
+                            </button>
+                            <div id="diagram-ip" class="gate-diagram mt-4 bg-slate-700 p-4 rounded-lg border border-slate-600">
+                                <svg width="100%" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif" font-size="10">
+                                    <g>
+                                        <rect x="25" y="60" width="100" height="40" rx="5" fill="#1e40af" stroke="#60a5fa" stroke-width="1.5"/>
+                                        <text x="75" y="85" fill="#f1f5f9" text-anchor="middle" font-weight="600">TimeVault (Vault)</text>
+                                    </g>
+                                    <g>
+                                        <rect x="150" y="60" width="100" height="40" rx="5" fill="#065f46" stroke="#34d399" stroke-width="1.5"/>
+                                        <text x="200" y="85" fill="#f1f5f9" text-anchor="middle" font-weight="600">Guardian Marks</text>
+                                    </g>
+                                    <g>
+                                        <rect x="275" y="60" width="100" height="40" rx="5" fill="#334155" stroke="#64748b" stroke-width="1.5"/>
+                                        <text x="325" y="85" fill="#f1f5f9" text-anchor="middle" font-weight="600">GGP (Operator)</text>
+                                    </g>
+
+                                    <!-- Arrows -->
+                                    <g>
+                                        <path d="M 130 70 H 145" stroke="#34d399" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+                                        <text x="137" y="60" fill="#34d399" text-anchor="middle" font-size="8">Grants License</text>
+                                    </g>
+                                    <g>
+                                        <path d="M 255 70 H 270" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowhead-slate)"/>
+                                        <text x="262" y="60" fill="#94a3b8" text-anchor="middle" font-size="8">Grants Sub-License</text>
+                                    </g>
+                                    <g>
+                                        <path d="M 270 90 H 255" stroke="#eab308" stroke-width="2" marker-end="url(#arrowhead-yellow-rev)"/>
+                                        <text x="262" y="100" fill="#eab308" text-anchor="middle" font-size="8">Pays License Fee</text>
+                                    </g>
+                                    <g>
+                                        <path d="M 145 90 H 130" stroke="#eab308" stroke-width="2" marker-end="url(#arrowhead-yellow-rev)"/>
+                                        <text x="137" y="100" fill="#eab308" text-anchor="middle" font-size="8">Pays Profit</text>
+                                    </g>
+
+                                    <text x="200" y="140" fill="#cbd5e1" font-weight="bold" text-anchor="middle" font-size="12">IP & BRAND FLOW</text>
+                                    <text x="200" y="160" fill="#cbd5e1" text-anchor="middle" font-size="10">The "Brand" (IP) is held in the Vault, safe from lawsuits.</text>
+                                    <text x="200" y="175" fill="#cbd5e1" text-anchor="middle" font-size="10">The Operator (GGP) only *licenses* it, creating a clean flow.</text>
+
+                                    <defs>
+                                        <marker id="arrowhead-yellow-rev" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                                            <polygon points="10 0, 0 3.5, 10 7" fill="#eab308" />
+                                        </marker>
+                                    </defs>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr class="border-slate-600">
+                <p class="text-center text-lg text-gray-300 font-semibold">We build the gate *before* the attack. The Trust is the next priority to protect the "family" from itself.</p>
+            </div>
+        </section>
+
+        <!-- "GUIDING PHILOSOPHY" SECTION -->
+        <section class="mb-16 text-center">
+          <h2 class="text-3xl font-bold text-white mb-8">Earning Trust Through Systems</h2>
+          <div class="max-w-3xl mx-auto space-y-6 text-xl text-gray-300">
+            <p>We build an <strong class="text-blue-300">interdependent fortress</strong>, not fiefdoms.</p>
+            <p>The outside tables (<strong class="text-amber-300">MOHV</strong>, <strong class="text-indigo-300">GGCG</strong>) protect. The inside engine (<strong class="text-white">FFC</strong>, <strong class="text-white">GGP</strong>, <strong class="text-white">CNG</strong>) produces.</p>
+            <p class="font-semibold text-white">We earn our seat by protecting capital and delivering clean execution.</p>
+            <p class="text-2xl font-bold text-yellow-300 mt-2">Do it right once. Scale forever.</p>
+          </div>
+        </section>
+
+        <!-- NEW: "DECISION GUIDE" SECTION -->
+        <section class="mt-20 pt-16 border-t-2 border-slate-700">
+             <h2 class="text-4xl font-bold text-white text-center mb-4">Your Decision Guide</h2>
+             <p class="text-xl text-yellow-300 text-center mb-10 max-w-3xl mx-auto">This is the fundamental choice between the "mom-and-pop" *feeling* of direct ownership and the "systems over chaos" *reality* of protection and simplicity. Here are the four options.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+
+                <!-- OPTION 1: Direct Partnership (Chaos) -->
+                <div class="decision-card decision-card-chaos rounded-lg p-6 space-y-4">
+                  <h3 class="text-2xl font-bold text-red-400">Option 1: Direct 6-Partner Ownership</h3>
+                  <p class="text-lg"><strong class="text-white">Structure:</strong> The 6 partners own GGP directly. IE is out.</p>
+                  <p class="text-lg font-semibold text-white">Why it fails:</p>
+                  <ul class="list-none space-y-2 text-gray-300 text-lg consequence-list">
+                    <li><strong class="text-red-400">Tax sprawl:</strong> GGP becomes a partnership (Form 1065 + K-1s).</li>
+                    <li><strong class="text-red-400">Governance gridlock:</strong> New OA, new votes, slow decisions.</li>
+                    <li><strong class="text-red-400">Weaker shields:</strong> Messy fit with FFC/MOHV/GGCG.</li>
+                  </ul>
+                </div>
+
+                <!-- OPTION 2: Hybrid Ownership (Chaos) -->
+                <div class="decision-card decision-card-chaos rounded-lg p-6 space-y-4">
+                  <h3 class="text-2xl font-bold text-red-400">Option 2: Hybrid (IE + direct minority)</h3>
+                  <p class="text-lg"><strong class="text-white">Structure:</strong> IE owns most, partners own a slice directly.</p>
+                  <p class="text-lg font-semibold text-white">Why it fails:</p>
+                  <ul class="list-none space-y-2 text-gray-300 text-lg consequence-list">
+                    <li><strong class="text-red-400">Still a partnership:</strong> Returns and K-1s multiply anyway.</li>
+                    <li><strong class="text-red-400">Two boards, one pizza:</strong> Confusing authority, slower ops.</li>
+                    <li><strong class="text-red-400">No added protection:</strong> Complexity without benefit.</li>
+                  </ul>
+                </div>
+
+                <!-- OPTION 3: Parallel Holding Co (UPDATED) -->
+                <div class="decision-card decision-card-chaos rounded-lg p-6 space-y-4">
+                  <h3 class="text-2xl font-bold text-red-400">Option 3: Parallel Holding Co. (“Grumpy Goat Holdings”)</h3>
+                  <p class="text-lg"><strong class="text-white">Structure:</strong> A new holding company (owned by the 6) owns GGP, outside IE.</p>
+                  <p class="text-lg font-semibold text-white">Why it fails:</p>
+                  <ul class="list-none space-y-2 text-gray-300 text-lg consequence-list">
+                    <li><strong class="text-red-400">Silos over system:</strong> Breaks the fortress model.</li>
+                    <li><strong class="text-red-400">Extra filings:</strong> New partnership return + duplicated governance.</li>
+                    <li><strong class="text-red-400">Weaker leverage:</strong> Harder to standardize services and capital.</li>
+                  </ul>
+                </div>
+
+                <!-- OPTION 4: The Designed Fortress (System) -->
+                <div class="decision-card decision-card-system rounded-lg p-6 space-y-4">
+                  <h3 class="text-2xl font-bold text-green-400">Option 4: The Designed Fortress</h3>
+                  <p class="text-lg"><strong class="text-white">Structure:</strong> IE owns 100% of GGP (SMLLC; disregarded for tax).</p>
+                  <p class="text-lg font-semibold text-white">Why it wins:</p>
+                  <ul class="list-none space-y-2 text-gray-300 text-lg consequence-list">
+                    <li><strong class="text-green-400">One roll-up:</strong> Clean IE return, fewer moving pieces.</li>
+                    <li><strong class="text-green-400">Clear control:</strong> Board sets guardrails; operators execute.</li>
+                    <li><strong class="text-green-400">Real protection:</strong> Legal bulkheads + arm’s-length flows.</li>
+                  </ul>
+                </div>
+
+            </div>
+            
+            <hr class="border-slate-700 my-12">
+            
+            <div class="max-w-3xl mx-auto text-center">
+                <p class="text-2xl font-semibold text-white italic">The fundamental choice is:</p>
+                <p class="text-2xl mt-4 text-gray-300">Do we choose the *feeling* of direct ownership and accept the *reality* of tax nightmares and governance chaos?</p>
+                <p class="text-2xl font-semibold text-white my-4">OR</p>
+                <p class="text-2xl text-gray-300">Do we choose the *system* of unified ownership to gain the *reality* of tax simplicity, clean governance, and true, lasting protection?</p>
+            </div>
+            
+        </section>
+
     </div>
-  </section>
 
-  <!-- Main Container -->
-  <div class="container mx-auto p-4 py-8 md:p-12 max-w-6xl">
-    <!-- Header Section -->
-    <header class="text-center mb-4">
-      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">A System for Stability</h1>
-      <p class="text-xl md:text-2xl text-blue-300 max-w-3xl mx-auto">This is about <strong>protection and longevity,</strong> not forced growth. It's a structure designed to protect what we are building right now.</p>
-    </header>
+    <!-- JavaScript for Interactivity -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
 
-    <!-- Sticky Quick Nav -->
-    <nav class="sticky top-0 z-40 bg-slate-900/80 backdrop-blur border-b border-slate-800 mb-12">
-      <div class="max-w-6xl mx-auto px-4 py-2 flex flex-wrap items-center justify-center gap-2 text-sm">
-        <a href="#money-flows" class="px-3 py-1 rounded-md border border-slate-700 text-slate-200 hover:text-white hover:bg-slate-800 transition">Money Flows</a>
-        <a href="#fortress" class="px-3 py-1 rounded-md border border-slate-700 text-slate-200 hover:text-white hover:bg-slate-800 transition">Fortress (4 D's)</a>
-        <a href="#ip-flow" class="px-3 py-1 rounded-md border border-slate-700 text-slate-200 hover:text-white hover:bg-slate-800 transition">IP Flow</a>
-        <a href="#tax-implications" class="px-3 py-1 rounded-md border border-slate-700 text-slate-200 hover:text-white hover:bg-slate-800 transition">Tax</a>
-        <a href="#decision-guide" class="px-3 py-1 rounded-md border border-slate-700 text-slate-200 hover:text-white hover:bg-slate-800 transition">Decision Guide</a>
-      </div>
-    </nav>
+            // --- Interactive Diagram Logic ---
+            const diagramBoxes = document.querySelectorAll('.diagram-box');
+            const infoPanel = document.getElementById('info-panel');
+            const infoWrapper = document.getElementById('info-panel-wrapper');
+            let activeBox = null;
 
-    <!-- Interactive Diagram Section -->
-    <section class="mb-16">
-      <h2 class="text-3xl font-bold text-white text-center mb-8">Our Structure: An Interactive View</h2>
-      <p class="text-center text-gray-400 mb-6 italic">Tap or click any box to learn about its role.</p>
+            const infoContent = {
+                'info-ie': {
+                    title: 'Infinite Earth (IE) - The Parent (6 Members)',
+                    text: `
+                        <p class="mb-3"><span class="chaos">Without This System (Chaos):</span> It would be one giant, messy LLC. All 6 members would be arguing, and a lawsuit against GGP could drain CNG's bank account. This is 'chaos'.</p>
+                        <p><span class="system">With This System (Order):</span> IE is the Parent. It provides a 'Personal Shield' for the 6 members and an 'Inter-Business Shield' for its ops. The Board sets 'guardrails,' and the operators (GGP, CNG, FFC) operate *within* them. This is 'order'.</p>
+                    `,
+                    color: 'border-blue-500', glow: 'active-glow-blue'
+                },
+                'info-ggp': {
+                    title: 'Grumpy Goat Pizza (GGP) - The Operator',
+                    text: `
+                        <p class="mb-3"><span class="chaos">Without This System (Chaos):</span> GGP would own its own truck, building, and loan. A single truck accident could bankrupt the *entire business*—losing the store, the building, and the brand.</p>
+                        <p><span class="system">With This System (Order):</span> GGP is the *Operator*. It focuses *only* on selling pizza. It pays 'rent' (to MOHV) and a 'loan' (to GGCG). Its risk is isolated. This is 'focus'.</p>
+                    `,
+                    color: 'border-slate-500', glow: 'active-glow-slate'
+                },
+                'info-cng': {
+                    title: 'Crumb n Get It (CNG) - The Operator',
+                    text: `
+                        <p class="mb-3"><span class="chaos">Without This System (Chaos):</span> CNG's bank account would be mixed with GGP's. A GGP lawsuit could seize CNG's ovens and cash. Its success would be *punished* by GGP's risk.</p>
+                        <p><span class="system">With This System (Order):</span> CNG is a *protected operator*. It's in its own 'silo,' shielded by IE from GGP's liability. Its success is its own. This is 'safety'.</p>
+                    `,
+                    color: 'border-slate-500', glow: 'active-glow-slate'
+                },
+                'info-ffc': {
+                    title: 'Fulcrum Fortress (FFC) - Shared Support Ops',
+                    text: `
+                        <p class="mb-3"><span class="chaos">Without This System (Chaos):</span> Each business (GGP, CNG) would make its own mistakes, creating separate, inefficient systems. This is a 'bookkeeping nightmare' of duplicated effort and inconsistent quality.</p>
+                        <p><span class="system">With This System (Order):</span> FFC is the *playbook*. It solves problems *once* and shares the solution. It provides the 'systems over chaos' engine, ensuring quality and efficiency. This is 'synergy'.</p>
+                    `,
+                    color: 'border-slate-500', glow: 'active-glow-slate'
+                },
+                'info-mohv': {
+                    title: 'My Okie Heart (MOHV) - Allied Landlord',
+                    text: `
+                        <p class="mb-3"><span class="chaos">Without This System (Chaos):</span> The building and truck would be *inside* GGP, held hostage by GGP's operational risk. A GGP lawsuit would seize them, and MOHV's owners' assets would be exposed.</p>
+                        <p><span class="system">With This System (Order):</span> MOHV is the 'Landlord.' It holds assets *safely separate*. It doesn't 'make' money, it *preserves* it. <strong>Its benefit is total insulation.</strong> Because it's not attached to IE, a lawsuit against IE or GGP *cannot touch it*. This is 'ultimate protection'.</p>
+                    `,
+                    color: 'border-amber-400', glow: 'active-glow-amber'
+                },
+                'info-ggcg': {
+                    title: 'Grumpy Goat Capital (GGCG) - Allied Bank',
+                    text: `
+                        <p class="mb-3"><span class="chaos">Without This System (Chaos):</span> The main bank loan would be on IE or GGP. A default could trigger clauses that bankrupt the entire group and risk MOHV's assets. The bank would have leverage over *everything*.</p>
+                        <p><span class="system">With This System (Order):</span> GGCG is the 'Bank.' It *isolates* the primary debt. <strong>Its benefit is financial insulation.</strong> Because it's not attached to IE, a catastrophic lawsuit against IE *cannot* stop the loan payments, protecting GGCG's owners and their bank relationship. This is 'financial armor'.</p>
+                    `,
+                    color: 'border-indigo-400', glow: 'active-glow-indigo'
+                },
+                'default': {
+                    title: 'A System for Stability',
+                    text: 'Click on any of the entities above to see its specific role. This system is designed to protect each business by creating legal shields ("bulkheads") and providing shared support.',
+                    color: 'border-slate-700', glow: ''
+                }
+            };
 
-      <!-- Diagram Container -->
-      <div class="w-full max-w-5xl mx-auto">
-        <!-- Row 1: Infinite Earth (Parent) -->
-        <div class="flex justify-center mb-6">
-          <div id="diagram-ie" data-target="info-ie" data-glow="blue" class="diagram-box w-3/4 md:w-1/2 bg-blue-800 border-2 border-blue-400 rounded-lg p-5 text-center cursor-pointer hover-glow-blue">
-            <h3 class="text-2xl font-semibold text-white">Infinite Earth (IE)</h3>
-            <p class="text-blue-200">The Parent / 6 Members</p>
-          </div>
-        </div>
+            function updateInfoPanel(targetId) {
+                const content = infoContent[targetId] || infoContent['default'];
+                infoPanel.innerHTML = `
+                    <h3 class="text-2xl font-semibold text-white mb-4">${content.title}</h3>
+                    <div class="text-gray-300 text-lg space-y-4">${content.text}</div>
+                `;
+                infoPanel.className = `bg-slate-800 rounded-lg p-6 md:p-8 min-h-[160px] transition-all duration-300 shadow-xl border-2 info-panel-content ${content.color}`;
+            }
 
-        <!-- Connecting Line (visual) -->
-        <div class="w-1 h-8 bg-gray-600 mx-auto"></div>
-        <p class="text-center text-gray-400 mb-2 text-lg font-semibold">Operating Companies (Owned by IE)</p>
+            updateInfoPanel('default');
 
-        <!-- Row 2: Operating Companies (Owned by IE) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-6">
-          <div id="diagram-ggp" data-target="info-ggp" data-glow="slate" class="diagram-box bg-slate-700 border-2 border-slate-500 rounded-lg p-5 text-center cursor-pointer hover-glow-slate">
-            <h3 class="text-2xl font-semibold text-white">Grumpy Goat (GGP)</h3>
-            <p class="text-gray-300">The Pizza Co. (Operator)</p>
-          </div>
-          <div id="diagram-cng" data-target="info-cng" data-glow="slate" class="diagram-box bg-slate-700 border-2 border-slate-500 rounded-lg p-5 text-center cursor-pointer hover-glow-slate">
-            <h3 class="text-2xl font-semibold text-white">Crumb n Get It (CNG)</h3>
-            <p class="text-gray-300">The Bakery Co. (Operator)</p>
-          </div>
-          <div id="diagram-ffc" data-target="info-ffc" data-glow="slate" class="diagram-box bg-slate-700 border-2 border-slate-500 rounded-lg p-5 text-center cursor-pointer hover-glow-slate">
-            <h3 class="text-2xl font-semibold text-white">Fulcrum Fortress (FFC)</h3>
-            <p class="text-gray-300">Shared Support & Systems</p>
-          </div>
-        </div>
+            diagramBoxes.forEach(box => {
+                box.addEventListener('click', () => {
+                    const targetId = box.dataset.target;
+                    const glowClass = infoContent[targetId].glow;
 
-        <!-- Connecting Line (visual) -->
-        <div class="w-1 h-8 bg-gray-600 mx-auto"></div>
-        <p class="text-center text-gray-400 mb-2 text-lg font-semibold">Allied & Specialized Partners</p>
+                    if (activeBox) {
+                        activeBox.classList.remove('active-box', 'active-glow-blue', 'active-glow-amber', 'active-glow-indigo', 'active-glow-slate');
+                    }
+                    
+                    box.classList.add('active-box');
+                    if (glowClass) {
+                        box.classList.add(glowClass);
+                    }
+                    activeBox = box;
+                    
+                    updateInfoPanel(targetId);
+                    
+                    let faqToOpen = null;
+                    if (targetId === 'info-mohv' || targetId === 'info-ggcg') {
+                        faqToOpen = document.querySelector('.faq-toggle[data-faq="hogcreek"]');
+                    } else if (targetId === 'info-ggp') {
+                        faqToOpen = document.querySelector('.faq-toggle[data-faq="units"]');
+                    } else if (targetId === 'info-ie' || targetId === 'info-ffc') {
+                         faqToOpen = document.querySelector('.faq-toggle[data-faq="shields"]');
+                    }
+                    
+                    if (faqToOpen) {
+                        const content = faqToOpen.nextElementSibling;
+                        if (!content.classList.contains('open')) {
+                            document.querySelectorAll('.faq-content.open').forEach(openContent => {
+                                openContent.classList.remove('open');
+                                openContent.previousElementSibling.classList.remove('open');
+                            });
+                            content.classList.add('open');
+                            faqToOpen.classList.add('open');
+                        }
+                        faqToOpen.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+            });
 
-        <!-- Row 3: Allied & Specialized (Separate Ownership) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 max-w-3xl mx-auto">
-          <div id="diagram-mohv" data-target="info-mohv" data-glow="amber" class="diagram-box bg-amber-800 border-2 border-amber-400 rounded-lg p-5 text-center cursor-pointer hover-glow-amber">
-            <h3 class="text-2xl font-semibold text-white">My Okie Heart (MOHV)</h3>
-            <p class="text-amber-200">Asset Holding (Landlord)</p>
-          </div>
-          <div id="diagram-ggcg" data-target="info-ggcg" data-glow="indigo" class="diagram-box bg-indigo-800 border-2 border-indigo-400 rounded-lg p-5 text-center cursor-pointer hover-glow-indigo">
-            <h3 class="text-2xl font-semibold text-white">Grumpy Goat Capital (GGCG)</h3>
-            <p class="text-indigo-200">Capital & Funding (Bank)</p>
-          </div>
-        </div>
-      </div>
+            // --- FAQ Accordion Logic ---
+            const faqToggles = document.querySelectorAll('.faq-toggle');
+            faqToggles.forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const content = toggle.nextElementSibling;
+                    const isOpen = content.classList.contains('open');
 
-      <!-- Info Panel -->
-      <div id="info-panel-wrapper" class="mt-12">
-        <div id="info-panel" class="bg-slate-800 rounded-lg p-6 md:p-8 min-h-[160px] transition-all duration-300 shadow-xl border-2 border-slate-700 info-panel-content"></div>
-      </div>
-    </section>
+                    // Close all others
+                    document.querySelectorAll('.faq-content.open').forEach(openContent => {
+                        openContent.classList.remove('open');
+                        openContent.previousElementSibling.classList.remove('open');
+                    });
 
-    <!-- HOW THE MONEY MOVES (Interactive) -->
-    <section id="money-flows" class="mb-16">
-      <h2 class="text-3xl font-bold text-white text-center mb-8">How the Money Moves: An Interactive Flow</h2>
-      <p class="text-center text-gray-400 mb-6 italic">Click buttons to toggle flows on/off. Combine flows!</p>
+                    // Open the clicked one (if it wasn't already open)
+                    if (!isOpen) {
+                        content.classList.add('open');
+                        toggle.classList.add('open');
+                    }
+                });
+            });
+            
+            // Auto-open first FAQ and SMLLC FAQ
+            const firstFaq = document.querySelector('.faq-toggle[data-faq="hogcreek"]');
+            if (firstFaq) {
+                firstFaq.classList.add('open');
+                firstFaq.nextElementSibling.classList.add('open');
+            }
+            const smllcFaq = document.querySelector('.faq-toggle[data-faq="smllc"]');
+             if (smllcFaq) {
+                smllcFaq.classList.add('open');
+                smllcFaq.nextElementSibling.classList.add('open');
+             }
 
-      <div class="control-panel flex flex-wrap justify-center gap-1 mb-6 p-1 bg-slate-800 border border-slate-700 rounded-lg max-w-lg mx-auto">
-        <button id="btn-flow-all" class="flow-btn active flex-grow px-4 py-2 rounded-md font-medium transition-colors text-sm md:text-base" data-flow-type="all">All Flows</button>
-        <button id="btn-flow-ggp" class="flow-btn flex-grow px-4 py-2 rounded-md font-medium transition-colors text-sm md:text-base" data-flow-type="ggp">GGP/CNG</button>
-        <button id="btn-flow-ffc" class="flow-btn flex-grow px-4 py-2 rounded-md font-medium transition-colors text-sm md:text-base" data-flow-type="ffc">FFC</button>
-        <button id="btn-flow-ggcg" class="flow-btn flex-grow px-4 py-2 rounded-md font-medium transition-colors text-sm md:text-base" data-flow-type="ggcg">GGCG</button>
-        <button id="btn-flow-mohv" class="flow-btn flex-grow px-4 py-2 rounded-md font-medium transition-colors text-sm md:text-base" data-flow-type="mohv">MOHV</button>
-        <button id="btn-flow-ie" class="flow-btn flex-grow px-4 py-2 rounded-md font-medium transition-colors text-sm md:text-base" data-flow-type="ie">IE</button>
-      </div>
 
-      <div class="w-full max-w-5xl mx-auto p-4 bg-slate-800 rounded-lg border border-slate-700 shadow-lg">
-        <svg width="100%" viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif" font-size="10">
-          <text x="75" y="20" fill="#cbd5e1" font-weight="bold" text-anchor="middle">OPERATORS</text>
-          <text x="250" y="20" fill="#cbd5e1" font-weight="bold" text-anchor="middle">ALLIED PARTNERS</text>
-          <text x="500" y="20" fill="#cbd5e1" font-weight="bold" text-anchor="middle">THE PARENT</text>
+            // --- Interactive Money Flow Logic (MULTI-SELECT) ---
+            const flowButtons = document.querySelectorAll('.flow-btn');
+            const flowPaths = document.querySelectorAll('.flow-path');
+            let activeFlows = new Set(['all']); // Start with 'all' active
 
-          <g id="box-ggp"><rect x="25" y="110" width="100" height="40" rx="5" fill="#334155" stroke="#64748b" stroke-width="1.5"/><text x="75" y="135" fill="#f1f5f9" text-anchor="middle" font-weight="semibold">GGP / CNG</text></g>
-          <g id="box-ffc"><rect x="25" y="180" width="100" height="40" rx="5" fill="#334155" stroke="#64748b" stroke-width="1.5"/><text x="75" y="205" fill="#f1f5f9" text-anchor="middle" font-weight="semibold">FFC (Support)</text></g>
-          <g id="box-mohv"><rect x="200" y="40" width="100" height="40" rx="5" fill="#7c2d12" stroke="#fb923c" stroke-width="1.5"/><text x="250" y="65" fill="#f1f5f9" text-anchor="middle" font-weight="semibold">MOHV (Landlord)</text></g>
-          <g id="box-ggcg"><rect x="200" y="110" width="100" height="40" rx="5" fill="#4338ca" stroke="#818cf8" stroke-width="1.5"/><text x="250" y="135" fill="#f1f5f9" text-anchor="middle" font-weight="semibold">GGCG (Bank)</text></g>
-          <g id="box-bank"><rect x="200" y="250" width="100" height="40" rx="5" fill="#9a3412" stroke="#fdba74" stroke-width="1.5"/><text x="250" y="275" fill="#f1f5f9" text-anchor="middle" font-weight="semibold">External Bank</text></g>
-          <g id="box-ie"><rect x="450" y="110" width="100" height="40" rx="5" fill="#1d4ed8" stroke="#60a5fa" stroke-width="1.5"/><text x="500" y="135" fill="#f1f5f9" text-anchor="middle" font-weight="semibold">Infinite Earth</text></g>
-          <g id="box-members"><rect x="450" y="250" width="100" height="40" rx="5" fill="#065f46" stroke="#34d399" stroke-width="1.5"/><text x="500" y="275" fill="#f1f5f9" text-anchor="middle" font-weight="semibold">6 Members</text></g>
+            const flowRules = {
+                all: () => true,
+                ggp: (d) => d.includes('ggp'),
+                ffc: (d) => d.includes('ffc'), // FFC profit flow has 'ffc ie'
+                ggcg: (d) => d.includes('ggcg'),
+                mohv: (d) => d.includes('mohv'),
+                ie: (d) => d.includes('ie') // IE distribution flow has 'ie'
+            };
 
-          <g class="flow-path" data-flow="ggp mohv"><path d="M 130 130 Q 165 110 195 80" stroke="#fb923c" stroke-width="2" fill="none" marker-end="url(#arrowhead-amber)"/><text class="flow-text" x="162" y="100" fill="#fb923c" font-weight="500" text-anchor="middle">1. Rent Payment</text></g>
-          <g class="flow-path" data-flow="ggp ggcg"><path d="M 130 130 H 195" stroke="#818cf8" stroke-width="2" fill="none" marker-end="url(#arrowhead-indigo)"/><text class="flow-text" x="162" y="125" fill="#818cf8" font-weight="500" text-anchor="middle">2. Loan Repay</text><path d="M 195 140 H 130" stroke="#818cf8" stroke-width="2" fill="none" marker-end="url(#arrowhead-indigo-rev)"/><text class="flow-text" x="162" y="150" fill="#818cf8" font-weight="500" text-anchor="middle">Loan Capital</text></g>
-          <g class="flow-path" data-flow="ggp ffc"><path d="M 85 155 V 175" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowhead-slate)"/><text class="flow-text" x="85" y="165" fill="#94a3b8" font-weight="500" text-anchor="middle" writing-mode="vertical-rl" transform="rotate(180 85 165)">3. Service Fee</text></g>
-          <g class="flow-path" data-flow="ggp ie"><path d="M 130 130 Q 290 100 445 125" stroke="#60a5fa" stroke-width="2" fill="none" marker-end="url(#arrowhead-blue)"/><text class="flow-text" x="290" y="115" fill="#60a5fa" font-weight="500" text-anchor="middle">4. GGP/CNG Profit</text></g>
-          <g class="flow-path" data-flow="ffc ie"><path d="M 130 200 Q 290 160 445 145" stroke="#60a5fa" stroke-width="2" fill="none" marker-end="url(#arrowhead-blue)"/><text class="flow-text" x="290" y="170" fill="#60a5fa" font-weight="500" text-anchor="middle">4. FFC Profit</text></g>
-          <g class="flow-path" data-flow="ie"><path d="M 500 155 V 245" stroke="#34d399" stroke-width="2" marker-end="url(#arrowhead-green)"/><text class="flow-text" x="500" y="200" fill="#34d399" font-weight="500" text-anchor="middle" writing-mode="vertical-rl" transform="rotate(180 500 200)">5. Distributions</text></g>
-          <g class="flow-path" data-flow="ggcg"><path d="M 250 245 V 155" stroke="#fdba74" stroke-width="2" marker-end="url(#arrowhead-orange)"/><text class="flow-text" x="250" y="200" fill="#fdba74" font-weight="500" text-anchor="middle" writing-mode="vertical-rl" transform="rotate(180 250 200)">Ext. Bank Loan</text></g>
+            function updateFlowVisibility() {
+                // If 'all' is active, show everything
+                if (activeFlows.has('all')) {
+                    flowPaths.forEach(path => path.style.opacity = '1');
+                    return;
+                }
+                // If no specific flows are active, show nothing (or dim everything)
+                 if (activeFlows.size === 0) {
+                     flowPaths.forEach(path => path.style.opacity = '0.1');
+                     return;
+                 }
 
-          <defs>
-            <marker id="arrowhead-amber" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#fb923c"/></marker>
-            <marker id="arrowhead-indigo" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#818cf8"/></marker>
-            <marker id="arrowhead-indigo-rev" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="10 0, 0 3.5, 10 7" fill="#818cf8"/></marker>
-            <marker id="arrowhead-slate" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8"/></marker>
-            <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#60a5fa"/></marker>
-            <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#34d399"/></marker>
-            <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#fdba74"/></marker>
-          </defs>
-        </svg>
-      </div>
+                // Otherwise, show paths matching ANY active flow type
+                flowPaths.forEach(path => {
+                    const dataFlow = path.dataset.flow.split(' '); // e.g., ['ggp', 'mohv']
+                    let isVisible = false;
+                    activeFlows.forEach(activeType => {
+                         // Check if any part of the path's data-flow matches the active type
+                         // OR if the active type specifically targets this interaction (e.g., 'ggp' should show 'ggp mohv')
+                        if (flowRules[activeType] && flowRules[activeType](path.dataset.flow)) {
+                             isVisible = true;
+                         }
+                    });
+                     path.style.opacity = isVisible ? '1' : '0.1';
+                });
+            }
 
-      <div class="max-w-3xl mx-auto bg-slate-800 rounded-lg border border-slate-700 p-6 md:p-8 space-y-6 shadow-lg mt-8">
-        <p class="text-center text-lg text-gray-300">This system replaces chaos with simple, documented, arm's-length transactions.</p>
-        <div class="space-y-4">
-          <div class="flex items-start space-x-4"><div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-amber-600 rounded-full flex items-center justify-center text-xl font-bold text-white">1</div><div><h3 class="text-xl font-semibold text-amber-300">Rent / Lease Payments</h3><p class="text-gray-300 text-base md:text-lg">GGP pays <strong class="text-white">MOHV</strong> for the use of the building and truck.</p></div></div>
-          <div class="flex items-start space-x-4"><div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-indigo-600 rounded-full flex items-center justify-center text-xl font-bold text-white">2</div><div><h3 class="text-xl font-semibold text-indigo-300">Loan Repayments</h3><p class="text-gray-300 text-base md:text-lg">GGP pays <strong class="text-white">GGCG</strong> its loan repayment (principal + interest).</p></div></div>
-          <div class="flex items-start space-x-4"><div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-slate-600 rounded-full flex items-center justify-center text-xl font-bold text-white">3</div><div><h3 class="text-xl font-semibold text-slate-300">Service Payments (MSA)</h3><p class="text-gray-300 text-base md:text-lg">GGP and CNG pay <strong class="text-white">FFC</strong> for shared support.</p></div></div>
-          <div class="flex items-start space-x-4"><div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-blue-600 rounded-full flex items-center justify-center text-xl font-bold text-white">4</div><div><h3 class="text-xl font-semibold text-blue-300">Profit Roll Up</h3><p class="text-gray-300 text-base md:text-lg">After bills, remaining profits from GGP, CNG, and <strong class="text-white">FFC</strong> roll up to <strong class="text-white">IE</strong>.</p></div></div>
-          <div class="flex items-start space-x-4"><div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-green-600 rounded-full flex items-center justify-center text-xl font-bold text-white">5</div><div><h3 class="text-xl font-semibold text-green-300">Member Distributions</h3><p class="text-gray-300 text-base md:text-lg"><strong class="text-white">IE</strong> distributes profits to the <strong class="text-white">6 Members</strong> per the Operating Agreement.</p></div></div>
-        </div>
-      </div>
-    </section>
+            flowButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const flowType = e.currentTarget.dataset.flowType;
 
-    <!-- Benefits Section -->
-    <section class="mb-16">
-      <h2 class="text-3xl font-bold text-white text-center mb-10">What This Gives Us (Today)</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-lg">
-          <div class="flex items-center mb-4"><div class="p-2 bg-green-800/50 rounded-lg mr-4"><svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><h3 class="text-2xl font-semibold text-white">Ultimate Asset Protection</h3></div>
-          <p class="text-gray-300 text-lg">Separation of ownership (IE doesn’t own MOHV/GGCG) is a stronger shield than an LLC alone. A lawsuit against IE cannot touch MOHV’s assets.</p>
-        </div>
-        <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-lg">
-          <div class="flex items-center mb-4"><div class="p-2 bg-green-800/50 rounded-lg mr-4"><svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg></div><h3 class="text-2xl font-semibold text-white">Tax Clarity & Simplicity</h3></div>
-          <p class="text-gray-300 text-lg">Ops (GGP, CNG, FFC) roll up to IE’s return. IE, MOHV, GGCG file their own partnership returns. Clean and organized.</p>
-        </div>
-        <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-lg">
-          <div class="flex items-center mb-4"><div class="p-2 bg-green-800/50 rounded-lg mr-4"><svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h3.75"/></svg></div><h3 class="text-2xl font-semibold text-white">Clarity & Stability</h3></div>
-          <p class="text-gray-300 text-lg">IE Board sets guardrails; business leaders run within them. Roles are clear.</p>
-        </div>
-        <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-lg">
-          <div class="flex items-center mb-4"><div class="p-2 bg-green-800/50 rounded-lg mr-4"><svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg></div><h3 class="text-2xl font-semibold text-white">Bookkeeping Clarity</h3></div>
-          <p class="text-gray-300 text-lg">Every transaction is a clean, documented payment: Rent→MOHV, Loan→GGCG, Services→FFC.</p>
-        </div>
-      </div>
-    </section>
+                    if (flowType === 'all') {
+                        // If 'all' is clicked, activate only 'all'
+                        activeFlows.clear();
+                        activeFlows.add('all');
+                        flowButtons.forEach(b => b.classList.toggle('active', b === btn));
+                    } else {
+                        // If a specific flow is clicked
+                        activeFlows.delete('all'); // Deactivate 'all' if active
+                         const isActive = btn.classList.toggle('active'); // Toggle the button's state
+                         if (isActive) {
+                             activeFlows.add(flowType); // Add to active set
+                         } else {
+                             activeFlows.delete(flowType); // Remove from active set
+                         }
+                         // Ensure 'all' button is inactive
+                         document.getElementById('btn-flow-all').classList.remove('active');
+                         // If no specific buttons are active, reactivate 'all'
+                         if (activeFlows.size === 0) {
+                              activeFlows.add('all');
+                              document.getElementById('btn-flow-all').classList.add('active');
+                         }
+                    }
+                    updateFlowVisibility();
+                });
+            });
+            
+            updateFlowVisibility(); // Initial setup
 
-    <!-- SWORD & ARMOR -->
-    <section class="mb-16">
-      <h2 class="text-3xl font-bold text-white text-center mb-10">The Sword & The Armor</h2>
-      <div class="max-w-3xl mx-auto bg-slate-800 rounded-lg border-2 border-yellow-400 p-6 md:p-8 space-y-6 shadow-xl shadow-yellow-500/20">
-        <p class="text-center text-2xl text-yellow-300 font-semibold">Creating vs. Sustaining Generational Wealth</p>
-        <p class="text-lg text-gray-300">The partners are focused on the sword, but the armor ensures we last for generations.</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-slate-700/70 p-5 rounded-lg border border-slate-600">
-            <h3 class="text-2xl font-semibold text-white mb-3 flex items-center">
-              <svg class="w-7 h-7 mr-3 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M22.414 3.586l-3-3a1 1 0 00-1.414 0l-15 15a1 1 0 000 1.414l3 3a1 1 0 001.414 0l15-15a1 1 0 000-1.414zM8 15.414l-3-3L14.586 3 17 5.414 8 15.414z"/><path d="M3.414 22.414l3-3a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414z"/></svg>
-              The Sword
-            </h3>
-            <p class="text-gray-300"><strong class="text-white">(Creating Wealth)</strong><br/>GGP, CNG, FFC go out to win and create wealth.</p>
-          </div>
-          <div class="bg-slate-700/70 p-5 rounded-lg border border-slate-600">
-            <h3 class="text-2xl font-semibold text-white mb-3 flex items-center">
-              <svg class="w-7 h-7 mr-3 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              The Armor
-            </h3>
-            <p class="text-gray-300"><strong class="text-white">(Sustaining Wealth)</strong><br/>The structure is heavy—until it’s the only thing that saves your life.</p>
-          </div>
-        </div>
-        <hr class="border-slate-600" />
-        <h3 class="text-xl font-semibold text-white">Generational wealth is destroyed by 3 things. Our armor defeats them:</h3>
-        <ul class="space-y-4 text-gray-300 text-lg">
-          <li class="flex items-start space-x-3"><span class="text-red-400 font-bold">Threat 1:</span><span> External Attack (Lawsuits) → <span class="text-green-400 font-semibold">Armor:</span> LLC shields + asset separation.</span></li>
-          <li class="flex items-start space-x-3"><span class="text-red-400 font-bold">Threat 2:</span><span> Internal Chaos (Infighting) → <span class="text-green-400 font-semibold">Armor:</span> Clean money trail (rent, loans, MSAs).</span></li>
-          <li class="flex items-start space-x-3"><span class="text-red-400 font-bold">Threat 3:</span><span> Failed Succession → <span class="text-green-400 font-semibold">Armor:</span> Trusts that lock in generational rules.</span></li>
-        </ul>
-        <hr class="border-slate-600" />
-        <blockquote class="border-l-4 border-yellow-400 p-4 bg-slate-700 rounded-r-lg">
-          <p class="text-xl md:text-2xl font-semibold text-white italic">"The sword makes <span class="text-yellow-300">us</span> rich. The armor makes our <span class="text-yellow-300">grandkids</span> rich."</p>
-        </blockquote>
-      </div>
-    </section>
+            // --- Future Gates Diagram Toggles ---
+            const btnShowTrust = document.getElementById('btn-show-trust');
+            const diagramTrust = document.getElementById('diagram-trust');
+            const btnTextTrust = document.getElementById('btn-text-trust');
 
-    <!-- ANALOGY -->
-    <section class="mb-16">
-      <h2 class="text-3xl font-bold text-white text-center mb-10">A Simple Analogy: The Farm Co-op</h2>
-      <div class="max-w-3xl mx-auto bg-slate-800 rounded-lg border border-slate-700 p-6 md:p-8 space-y-6 shadow-xl">
-        <p class="text-center text-lg text-gray-300">Not one farm—an allied co-op of farms. That’s how you last 100 years.</p>
-        <div class="space-y-4">
-          <div><h3 class="text-xl font-semibold text-blue-300">1. The Farm (IE)</h3><p class="text-gray-300 text-lg">Owned by all 6. The personal shield for operations.</p></div>
-          <div><h3 class="text-xl font-semibold text-blue-300">2. The Almanac (FFC)</h3><p class="text-gray-300 text-lg">The shared playbook. Solve once, share always.</p></div>
-          <div><h3 class="text-xl font-semibold text-blue-300">3. The Allied Farm (MOHV / GGCG)</h3><p class="text-gray-300 text-lg">Owns the tractor/barn and the bank loan. IE rents the tractor—ultimate asset shield.</p></div>
-          <div><h3 class="text-xl font-semibold text-blue-300">4. Replicated (Hogcreek / Poggio Ross)</h3><p class="text-gray-300 text-lg">Operator + Asset Holder pattern already works elsewhere—repeatable.</p></div>
-        </div>
-        <hr class="border-slate-600" />
-        <div class="space-y-4">
-          <blockquote class="border-l-4 border-yellow-400 p-4 bg-slate-700 rounded-r-lg"><p class="font-semibold text-yellow-300">“Bookkeeping nightmare?”</p><p class="text-gray-200 text-lg mt-1">Opposite. Clean, auditable: rent to MOHV, loans to GGCG, services to FFC.</p></blockquote>
-          <blockquote class="border-l-4 border-yellow-400 p-4 bg-slate-700 rounded-r-lg"><p class="font-semibold text-yellow-300">“Shady?”</p><p class="text-gray-200 text-lg mt-1">Opposite. No mixed accounts. Each company has one job—clean books.</p></blockquote>
-          <blockquote class="border-l-4 border-yellow-400 p-4 bg-slate-700 rounded-r-lg"><p class="font-semibold text-yellow-300">“Not big enough?”</p><p class="text-gray-200 text-lg mt-1">Build the barn before the storm. Do it right once.</p></blockquote>
-        </div>
-      </div>
-    </section>
+            const btnShowIp = document.getElementById('btn-show-ip');
+            const diagramIp = document.getElementById('diagram-ip');
+            const btnTextIp = document.getElementById('btn-text-ip');
 
-    <!-- FAQ / Common Objections -->
-    <section class="mb-16">
-      <h2 class="text-3xl font-bold text-white text-center mb-10">Your Questions Answered</h2>
-      <div class="max-w-3xl mx-auto space-y-4">
+            btnShowTrust.addEventListener('click', () => {
+                const isOpen = diagramTrust.classList.toggle('open');
+                btnTextTrust.textContent = isOpen ? 'Hide Fortress Diagram' : 'Show Fortress Diagram';
+            });
 
-        <div class="bg-slate-800 rounded-lg border-2 border-yellow-400 overflow-hidden shadow-xl shadow-yellow-500/20">
-          <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="hogcreek">
-            <span class="text-xl font-semibold text-yellow-300">What about MOHV, GGCG, and Hogcreek?</span>
-            <svg class="faq-icon w-6 h-6 text-yellow-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-          </button>
-          <div class="faq-content">
-            <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
-              <p><strong class="text-white">Protection:</strong> MOHV and GGCG are not owned by IE—ultimate shield. A lawsuit against IE cannot touch MOHV assets.</p>
-              <p><strong class="text-white">Tax clarity:</strong> 4 owners → standalone partnership returns. Clean and correct.</p>
-              <p><strong class="text-white">Replicable:</strong> Hogcreek/Poggio Ross proves the Operator + Asset Holder pattern.</p>
-            </div>
-          </div>
-        </div>
+            btnShowIp.addEventListener('click', () => {
+                const isOpen = diagramIp.classList.toggle('open');
+                btnTextIp.textContent = isOpen ? 'Hide IP Flow Diagram' : 'Show IP Flow Diagram';
+            });
 
-        <div class="bg-slate-800 rounded-lg border-2 border-amber-400 overflow-hidden shadow-xl shadow-amber-500/20">
-          <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="smllc">
-            <span class="text-xl font-semibold text-amber-300">Why must GGP stay a Single-Member LLC of IE?</span>
-            <svg class="faq-icon w-6 h-6 text-amber-300 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-          </button>
-          <div class="faq-content">
-            <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
-              <p>Add another owner and GGP becomes a partnership with its own 1065 and K-1s—exactly the complexity we designed against.</p>
-            </div>
-          </div>
-        </div>
+            // --- Quick-access CTA Logic ---
+            const btnOpenTaxes = document.getElementById('btn-open-taxes');
+            btnOpenTaxes.addEventListener('click', () => {
+                const taxFaq = document.querySelector('.faq-toggle[data-faq="smllc"]');
+                if (taxFaq) {
+                    const content = taxFaq.nextElementSibling;
+                    if (!content.classList.contains('open')) {
+                        // Close all others
+                        document.querySelectorAll('.faq-content.open').forEach(openContent => {
+                            openContent.classList.remove('open');
+                            openContent.previousElementSibling.classList.remove('open');
+                        });
+                        // Open the tax one
+                        content.classList.add('open');
+                        taxFaq.classList.add('open');
+                    }
+                    taxFaq.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
 
-        <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
-          <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="legal">
-            <span class="text-xl font-semibold text-white">Is this legal? Is this money laundering?</span>
-            <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-          </button>
-          <div class="faq-content">
-            <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
-              <p><strong class="text-white">Yes, legal.</strong> Laundering hides illegal sources; this organizes legal money into clear, auditable flows.</p>
-            </div>
-          </div>
-        </div>
+        });
+    </script>
 
-        <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
-          <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="bank">
-            <span class="text-xl font-semibold text-white">Won’t the bank ask questions?</span>
-            <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-          </button>
-          <div class="faq-content">
-            <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
-              <p>Banks prefer clarity and separation. They see the loan (GGCG) and assets (MOHV) insulated from ops risk.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
-          <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="why-llcs">
-            <span class="text-xl font-semibold text-white">We never said we’d use all these LLCs…</span>
-            <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-          </button>
-          <div class="faq-content">
-            <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
-              <p>These aren’t “extras”; they’re the foundation, walls, and roof for the pieces we already have: operator, assets, and bank loan.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
-          <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="ggcg-future">
-            <span class="text-xl font-semibold text-white">Do we dissolve GGCG after the loan?</span>
-            <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-          </button>
-          <div class="faq-content">
-            <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
-              <p>GGCG is the permanent “co-op bank” for future internal funding.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
-          <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="landlord">
-            <span class="text-xl font-semibold text-white">MOHV and GGCG roles?</span>
-            <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-          </button>
-          <div class="faq-content">
-            <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
-              <p><strong class="text-white">MOHV:</strong> Landlord for expensive physical assets. <strong class="text-white">GGCG:</strong> Bank for capital—formal intercompany loans.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
-          <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="shields">
-            <span class="text-xl font-semibold text-white">Which shields do we get?</span>
-            <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-          </button>
-          <div class="faq-content">
-            <div class="p-5 pt-0 text-gray-300 text-lg space-y-2">
-              <p><strong class="text-white">Personal shield (IE)</strong> protects personal assets.</p>
-              <p><strong class="text-white">Inter-business shield (IE)</strong> isolates ops from each other.</p>
-              <p><strong class="text-white">Asset shield (MOHV)</strong> isolates building/truck from ops lawsuits.</p>
-              <p><strong class="text-white">Ownership shield (MOHV/GGCG)</strong> IE doesn’t own them—ultimate protection.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
-          <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="units">
-            <span class="text-xl font-semibold text-white">Why extra LLCs for truck/store?</span>
-            <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-          </button>
-          <div class="faq-content">
-            <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
-              <p>The truck is high risk. Make it <code>GGP Unit 01, LLC</code> (owned 100% by GGP) with a DBA for public name—lawsuits stop at the truck.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
-          <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="taxes">
-            <span class="text-xl font-semibold text-white">Specific tax benefits?</span>
-            <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-          </button>
-          <div class="faq-content">
-            <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
-              <p>IE files one partnership return. GGP/CNG/FFC roll up (disregarded). MOHV/GGCG file their own partnership returns. Simpler overall.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
-          <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="control">
-            <span class="text-xl font-semibold text-white">How do 6 members control without chaos?</span>
-            <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-          </button>
-          <div class="faq-content">
-            <div class="p-5 pt-0 text-gray-300 text-lg space-y-4">
-              <p>The IE Board sets guardrails; business leaders run ops within them. Clear roles prevent chaos.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden shadow-lg">
-          <button class="faq-toggle w-full flex justify-between items-center p-5 text-left transition-colors duration-200" data-faq="setup">
-            <span class="text-xl font-semibold text-white">This seems like more setup paperwork.</span>
-            <svg class="faq-icon w-6 h-6 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
-          </button>
-          <div class="faq-content">
-            <div class="p-5 pt-0 text-gray-300 text-lg">
-              <p>It’s more setup once for far less complexity forever.</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- FUTURE GATES -->
-    <section class="mb-16">
-      <h2 class="text-3xl font-bold text-white text-center mb-10">The Future Gates of the Fortress</h2>
-      <div class="max-w-3xl mx-auto bg-slate-800 rounded-lg border-2 border-blue-400 p-6 md:p-8 space-y-6 shadow-xl shadow-blue-500/20">
-        <p class="text-center text-lg text-gray-300"><strong class="text-white">When do we build these gates?</strong> When chaos risk outweighs the hassle of building them.</p>
-        <hr class="border-slate-600" />
-        <div class="space-y-8">
-          <div>
-            <h3 id="fortress" class="text-2xl font-semibold text-blue-300 mb-4">Gate 1: The Legacy Fortress (Business Trust)</h3>
-            <blockquote class="border-l-4 border-yellow-400 p-4 bg-slate-700/70 rounded-r-lg mb-5"><p class="font-semibold text-yellow-300 text-lg">Why this is priority:</p><p class="text-gray-200 mt-1 text-lg">Protects the family from the 4 D’s: Death, Divorce, Disability, Disagreement.</p></blockquote>
-            <button id="btn-show-trust" class="gate-btn text-sm px-4 py-2 rounded-md font-semibold transition-colors flex items-center gap-2"><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span id="btn-text-trust">Show Fortress Diagram</span></button>
-            <div id="diagram-trust" class="gate-diagram mt-4 bg-slate-700 p-4 rounded-lg border border-slate-600">
-              <svg width="100%" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif" font-size="10">
-                <rect x="10" y="10" width="380" height="280" rx="15" fill="#334155" stroke="#60a5fa" stroke-width="4"/>
-                <text x="200" y="35" fill="#60a5fa" font-weight="bold" text-anchor="middle" font-size="14">THE BUSINESS TRUST (Generational Law)</text>
-                <path d="M 10 50 H 390" stroke="#60a5fa" stroke-width="4" />
-                <!-- crenellations -->
-                <path d="M 40 50 V 40 H 50 V 50M 80 50 V 40 H 90 V 50M 120 50 V 40 H 130 V 50M 160 50 V 40 H 170 V 50M 200 50 V 40 H 210 V 50M 240 50 V 40 H 250 V 50M 280 50 V 40 H 290 V 50M 320 50 V 40 H 330 V 50M 360 50 V 40 H 370 V 50" stroke="#60a5fa" stroke-width="4" fill="#334155"/>
-                <text x="200" y="75" fill="#cbd5e1" font-weight="bold" text-anchor="middle" font-size="12">PROTECTED PARTNERS & ASSETS</text>
-                <rect x="50" y="90" width="300" height="130" rx="10" fill="#1e293b" stroke="#475569"/>
-                <text x="200" y="110" fill="#f1f5f9" text-anchor="middle" font-weight="600">IE / MOHV / GGCG / Poggio Ross</text>
-                <text x="200" y="130" fill="#f1f5f9" text-anchor="middle" font-weight="600">GGP / CNG / Hogcreek</text>
-                <text x="200" y="150" fill="#f1f5f9" text-anchor="middle" font-weight="600">TimeVault (IP)</text>
-                <text x="200" y="170" fill="#f1f5f9" text-anchor="middle" font-weight="600">Partner Shares</text>
-                <text x="200" y="200" fill="#34d399" text-anchor="middle" font-weight="bold" font-size="12">FORTRESS IS SECURE</text>
-                <!-- Threats -->
-                <g><text x="60" y="250" fill="#f87171" font-weight="bold" text-anchor="middle">Divorce</text><path d="M 60 240 V 225" stroke="#f87171" stroke-width="2" marker-end="url(#arrowhead-red)"/><path d="M 60 225 L 40 245M 60 225 L 80 245" stroke="#f87171" stroke-width="2"/></g>
-                <g><text x="130" y="270" fill="#f87171" font-weight="bold" text-anchor="middle">Death</text><path d="M 130 260 V 225" stroke="#f87171" stroke-width="2" marker-end="url(#arrowhead-red)"/><path d="M 130 225 L 110 245M 130 225 L 150 245" stroke="#f87171" stroke-width="2"/></g>
-                <g><text x="200" y="250" fill="#f87171" font-weight="bold" text-anchor="middle">Disability</text><path d="M 200 240 V 225" stroke="#f87171" stroke-width="2" marker-end="url(#arrowhead-red)"/><path d="M 200 225 L 180 245M 200 225 L 220 245" stroke="#f87171" stroke-width="2"/></g>
-                <g><text x="270" y="270" fill="#f87171" font-weight="bold" text-anchor="middle">Disagreement</text><path d="M 270 260 V 225" stroke="#f87171" stroke-width="2" marker-end="url(#arrowhead-red)"/><path d="M 270 225 L 250 245M 270 225 L 290 245" stroke="#f87171" stroke-width="2"/></g>
-                <g><text x="340" y="250" fill="#f87171" font-weight="bold" text-anchor="middle">Personal Lawsuit</text><path d="M 340 240 V 225" stroke="#f87171" stroke-width="2" marker-end="url(#arrowhead-red)"/><path d="M 340 225 L 320 245M 340 225 L 360 245" stroke="#f87171" stroke-width="2"/></g>
-                <defs><marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#f87171"/></marker></defs>
-              </svg>
-            </div>
-          </div>
-
-          <div>
-            <h3 id="ip-flow" class="text-2xl font-semibold text-blue-300 mb-4">Gate 2: The Brand Fortress (IP)</h3>
-            <blockquote class="border-l-4 border-yellow-400 p-4 bg-slate-700/70 rounded-r-lg mb-5"><p class="font-semibold text-yellow-300 text-lg">Why this matters:</p><p class="text-gray-200 mt-1 text-lg">Protects the brand names, recipes, and systems. Operators only license the brand.</p></blockquote>
-            <button id="btn-show-ip" class="gate-btn text-sm px-4 py-2 rounded-md font-semibold transition-colors flex items-center gap-2"><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span id="btn-text-ip">Show IP Flow Diagram</span></button>
-            <div id="diagram-ip" class="gate-diagram mt-4 bg-slate-700 p-4 rounded-lg border border-slate-600">
-              <svg width="100%" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif" font-size="10">
-                <g><rect x="25" y="50" width="100" height="40" rx="5" fill="#1e40af" stroke="#60a5fa" stroke-width="1.5"/><text x="75" y="75" fill="#f1f5f9" text-anchor="middle" font-weight="600">TimeVault</text></g>
-                <g><rect x="150" y="50" width="100" height="40" rx="5" fill="#065f46" stroke="#34d399" stroke-width="1.5"/><text x="200" y="75" fill="#f1f5f9" text-anchor="middle" font-weight="600">Guardian Marks</text></g>
-                <g><rect x="275" y="50" width="100" height="40" rx="5" fill="#334155" stroke="#64748b" stroke-width="1.5"/><text x="325" y="75" fill="#f1f5f9" text-anchor="middle" font-weight="600">GGP</text></g>
-                <g><path d="M 125 70 H 150" stroke="#34d399" stroke-width="2"/><text x="137" y="60" fill="#34d399" text-anchor="middle" font-size="8">License</text></g>
-                <g><path d="M 250 70 H 275" stroke="#94a3b8" stroke-width="2"/><text x="262" y="60" fill="#94a3b8" text-anchor="middle" font-size="8">Sub-License</text></g>
-                <g><path d="M 275 90 H 250" stroke="#eab308" stroke-width="2"/><text x="262" y="100" fill="#eab308" text-anchor="middle" font-size="8">Fee</text></g>
-                <g><path d="M 150 90 H 125" stroke="#eab308" stroke-width="2"/><text x="137" y="100" fill="#eab308" text-anchor="middle" font-size="8">Profit</text></g>
-              </svg>
-            </div>
-          </div>
-        </div>
-        <hr class="border-slate-600" />
-        <p class="text-center text-lg text-gray-300 font-semibold">Build the gate before the attack.</p>
-      </div>
-    </section>
-
-    <!-- GUIDING PHILOSOPHY -->
-    <section class="mb-16 text-center">
-      <h2 class="text-3xl font-bold text-white mb-8">Our Guiding Philosophy: Earning Trust Through Systems</h2>
-      <div class="max-w-3xl mx-auto space-y-6 text-xl text-gray-300">
-        <p>We build an <strong class="text-blue-300">interdependent fortress</strong>, not silos.</p>
-        <p>The outside tables (<strong class="text-amber-300">MOHV</strong>, <strong class="text-indigo-300">GGCG</strong>) protect. The inside engine (<strong class="text-white">FFC</strong>, <strong class="text-white">GGP</strong>, <strong class="text-white">CNG</strong>) powers growth.</p>
-        <p class="font-semibold text-white">We earn our seat through flawless systems that protect their assets.</p>
-        <p class="text-2xl font-bold text-yellow-300 mt-6">Systems over chaos is the only way to guard and sustain shared generational wealth.</p>
-      </div>
-    </section>
-<section id="tax-implications" class="mb-16">
-  <h2 class="text-3xl font-bold text-white text-center mb-8">Taxes & Compliance</h2>
-  <div class="max-w-3xl mx-auto bg-slate-800 rounded-lg border border-slate-700 p-6 md:p-8 space-y-4">
-    <p class="text-gray-300 text-lg">
-      Roll-up stays clean: GGP, CNG, FFC are SMLLCs/disregarded → reported on IE’s partnership return.
-      MOHV & GGCG are separate partnerships with their own 1065 + K-1s.
-    </p>
-    <ul class="list-disc pl-6 text-gray-300 text-lg space-y-2">
-      <li><span class="text-white font-semibold">IE (parent):</span> files one 1065; members receive K-1s.</li>
-      <li><span class="text-white font-semibold">GGP / CNG / FFC:</span> no separate return; expenses/profit flow into IE.</li>
-      <li><span class="text-white font-semibold">MOHV / GGCG:</span> file their own 1065s; arm’s-length rent/interest.</li>
-    </ul>
-    <p class="text-sm text-slate-400">Not tax advice; confirm with your CPA.</p>
-  </div>
-</section>
-    <!-- Decision Guide -->
-    <section id="decision-guide" class="mt-20 pt-16 border-t-2 border-slate-700">
-      <h2 class="text-4xl font-bold text-white text-center mb-4">Your Decision Guide</h2>
-      <p class="text-xl text-yellow-300 text-center mb-10 max-w-3xl mx-auto">This is the fundamental choice between the "mom-and-pop" feeling of direct ownership and the "systems over chaos" reality of protection and simplicity. Here are the four options.</p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-        <div class="decision-card decision-card-chaos rounded-lg p-6 space-y-4"><h3 class="text-2xl font-bold text-red-400">Option 1: Direct 6-Partner Ownership (The "Mom-and-Pop" Way)</h3><p class="text-lg"><strong class="text-white">Structure:</strong> IE has <strong>NO</strong> ownership. The 6 partners own GGP directly.</p><p class="text-lg font-semibold text-white">Consequences (The Chaos):</p><ul class="list-none space-y-2 text-gray-300 text-lg consequence-list"><li><strong class="text-red-400">Tax Nightmare:</strong> GGP becomes a Partnership with its own 1065 and K-1s.</li><li><strong class="text-red-400">Governance Chaos:</strong> New GGP Operating Agreement; 6-way voting/gridlock risk.</li><li><strong class="text-red-400">Weakened Connection:</strong> Legal friction with FFC, MOHV, GGCG.</li></ul></div>
-        <div class="decision-card decision-card-chaos rounded-lg p-6 space-y-4"><h3 class="text-2xl font-bold text-red-400">Option 2: Hybrid Ownership (The "Worst of Both Worlds")</h3><p class="text-lg"><strong class="text-white">Structure:</strong> IE owns majority; one+ partners own minority directly.</p><p class="text-lg font-semibold text-white">Consequences:</p><ul class="list-none space-y-2 text-gray-300 text-lg consequence-list"><li><strong class="text-red-400">Still a Tax Return:</strong> Multiple owners → Partnership filing anyway.</li><li><strong class="text-red-400">Still Governance Complexity:</strong> Rights/votes between IE vs minority.</li><li><strong class="text-red-400">Breaks Simplicity:</strong> Complexity ↑, protection ≠ stronger.</li></ul></div>
-        <div class="decision-card decision-card-chaos rounded-lg p-6 space-y-4"><h3 class="text-2xl font-bold text-red-400">Option 3: Parallel Holding Co. ("Grumpy Goat Holdings")</h3><p class="text-lg"><strong class="text-white">Structure:</strong> New LLC owned by the 6 partners owns 100% of GGP, separate from IE.</p><p class="text-lg font-semibold text-white">Consequences:</p><ul class="list-none space-y-2 text-gray-300 text-lg consequence-list"><li><strong class="text-red-400">Violates Unity:</strong> Creates a silo outside IE’s fortress.</li><li><strong class="text-red-400">Tax Complexity:</strong> New partnership return at the holding co.</li><li><strong class="text-red-400">Governance Duplication:</strong> Parallel board, duplicated overhead.</li></ul></div>
-        <div class="decision-card decision-card-system rounded-lg p-6 space-y-4"><h3 class="text-2xl font-bold text-green-400">Option 4: The Designed Fortress (Systems Over Chaos)</h3><p class="text-lg"><strong class="text-white">Structure:</strong> Infinite Earth owns 100% of GGP (SMLLC, disregarded).</p><p class="text-lg font-semibold text-white">Benefits:</p><ul class="list-none space-y-2 text-gray-300 text-lg consequence-list"><li><strong class="text-green-400">Max Tax Simplicity:</strong> No separate GGP return; rolls up to IE.</li><li><strong class="text-green-400">Clean Governance:</strong> One board, one playbook, clear execution.</li><li><strong class="text-green-400">Strongest Protection:</strong> Fully integrated with IE/FFC/MOHV/GGCG shields.</li></ul></div>
-      </div>
-      <hr class="border-slate-700 my-12" />
-      <div class="max-w-3xl mx-auto text-center">
-        <p class="text-2xl font-semibold text-white italic">The fundamental choice is:</p>
-        <p class="text-2xl mt-4 text-gray-300">Do we choose the <em>feeling</em> of direct ownership and accept the <em>reality</em> of tax nightmares and governance chaos?</p>
-        <p class="text-2xl font-semibold text-white my-4">OR</p>
-        <p class="text-2xl text-gray-300">Do we choose the <em>system</em> of unified ownership to gain the <em>reality</em> of tax simplicity, clean governance, and true, lasting protection?</p>
-      </div>
-    </section>
-  </div>
-
-<!-- Core interactivity -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const infoPanel = document.getElementById('info-panel');
-  const boxes = document.querySelectorAll('.diagram-box');
-  let activeBoxEl = null;
-
-  const infoContent = {
-    'info-ie': {
-      title: 'Infinite Earth (IE) — The Parent (6 Members)',
-      text: `
-        <p class="mb-3"><span class="chaos">Without the system:</span> One giant, messy LLC. Cross-contamination of cash and risk. One dispute derails everything.</p>
-        <p><span class="system">With the system:</span> IE is the shield and the steering wheel. Members get a personal + inter-business shield; the Board sets guardrails and operators execute within them.</p>
-      `,
-      color: 'border-blue-500'
-    },
-    'info-ggp': {
-      title: 'Grumpy Goat Pizza (GGP) — The Operator',
-      text: `
-        <p class="mb-3"><span class="chaos">Without the system:</span> GGP owns the truck/building/loan. A single accident can take the whole shop and brand with it.</p>
-        <p><span class="system">With the system:</span> GGP focuses only on selling pizza. Pays <em>rent</em> (MOHV) and <em>loan</em> (GGCG). Risk is isolated; operations stay fast.</p>
-      `,
-      color: 'border-slate-500'
-    },
-    'info-cng': {
-      title: 'Crumb n Get It (CNG) — The Operator',
-      text: `
-        <p class="mb-3"><span class="chaos">Without the system:</span> Money mixes with GGP; a GGP claim can seize CNG cash and ovens.</p>
-        <p><span class="system">With the system:</span> CNG runs in its own protected lane under IE. Success isn’t punished by someone else’s risk.</p>
-      `,
-      color: 'border-slate-500'
-    },
-    'info-ffc': {
-      title: 'Fulcrum Fortress (FFC) — Shared Support',
-      text: `
-        <p class="mb-3"><span class="chaos">Without the system:</span> Each company reinvents bookkeeping, ops, and hiring. Inconsistent quality and duplicated effort.</p>
-        <p><span class="system">With the system:</span> Solve once, share always. FFC standardizes finance, HR, ops playbooks, and tooling via MSA.</p>
-      `,
-      color: 'border-slate-500'
-    },
-    'info-mohv': {
-      title: 'My Okie Heart (MOHV) — Allied Landlord',
-      text: `
-        <p class="mb-3"><span class="chaos">Without the system:</span> Hard assets sit inside ops; lawsuits can seize the building/truck.</p>
-        <p><span class="system">With the system:</span> MOHV owns the building/truck and leases to operators. It’s outside IE—an extra wall of protection around the crown jewels.</p>
-      `,
-      color: 'border-amber-400'
-    },
-    'info-ggcg': {
-      title: 'Grumpy Goat Capital (GGCG) — Allied Bank',
-      text: `
-        <p class="mb-3"><span class="chaos">Without the system:</span> Debt sits on IE/GGP; a default or claim can cascade through the stack.</p>
-        <p><span class="system">With the system:</span> GGCG isolates borrowing and formal intercompany loans. Banks see clean risk compartments; the group keeps flexibility.</p>
-      `,
-      color: 'border-indigo-400'
-    },
-    'default': {
-      title: 'A System for Stability',
-      text: `Click a tile to see its role. The fortress creates clean, arm’s-length flows (rent, loans, MSAs), isolates risk, and keeps decisions crisp.`,
-      color: 'border-slate-700'
-    }
-  };
-
-  // --- info panel ---
-  function setInfo(id){
-    const c = infoContent[id] || infoContent.default;
-    infoPanel.innerHTML =
-      `<h3 class="text-2xl font-semibold text-white mb-4">${c.title}</h3>
-       <div class="text-gray-300 text-lg space-y-4">${c.text}</div>`;
-    infoPanel.className =
-      `bg-slate-800 rounded-lg p-6 md:p-8 min-h-[160px] transition-all duration-300 shadow-xl border-2 info-panel-content ${c.color}`;
-  }
-  setInfo('default');
-
-  // --- open related FAQ (no scrolling) ---
-  function openRelatedFaq(targetId){
-    let faqKey = null;
-    if (targetId==='info-mohv' || targetId==='info-ggcg') faqKey='hogcreek';
-    else if (targetId==='info-ggp') faqKey='units';
-    else if (targetId==='info-ie' || targetId==='info-ffc') faqKey='shields';
-    if (!faqKey) return;
-    const toggle = document.querySelector(`.faq-toggle[data-faq="${faqKey}"]`);
-    if (!toggle) return;
-    const content = toggle.nextElementSibling;
-    if (!content.classList.contains('open')) {
-      document.querySelectorAll('.faq-content.open').forEach(el => {
-        el.classList.remove('open');
-        el.previousElementSibling.classList.remove('open');
-      });
-      content.classList.add('open');
-      toggle.classList.add('open');
-    }
-  }
-
-  // --- glow helper ---
-  function applyGlow(boxEl){
-    if (activeBoxEl) {
-      activeBoxEl.classList.remove(
-        'active-box','active-glow-blue','active-glow-amber','active-glow-indigo','active-glow-slate'
-      );
-    }
-    const glow = boxEl.getAttribute('data-glow');
-    boxEl.classList.add('active-box');
-    if (glow) boxEl.classList.add(`active-glow-${glow}`);
-    activeBoxEl = boxEl;
-  }
-
-  // --- flow multi-select ---
-  const flowButtons = document.querySelectorAll('.flow-btn');
-  const flowPaths   = document.querySelectorAll('.flow-path');
-  const active = new Set(['all']);
-
-  const rule = {
-    all : () => true,
-    ggp : d => d.includes('ggp'),
-    ffc : d => d.includes('ffc'),
-    ggcg: d => d.includes('ggcg'),
-    mohv: d => d.includes('mohv'),
-    ie  : d => d.includes('ie')
-  };
-
-  function renderFlows(){
-    if (active.has('all')) { flowPaths.forEach(p => p.style.opacity='1'); return; }
-    if (active.size===0)    { flowPaths.forEach(p => p.style.opacity='0.1'); return; }
-    flowPaths.forEach(p => {
-      const d = p.dataset.flow || '';
-      let v = false;
-      active.forEach(t => { if (rule[t] && rule[t](d)) v = true; });
-      p.style.opacity = v ? '1' : '0.1';
-    });
-  }
-
-  function setActiveFlowsTo(types){
-    active.clear();
-    if (types.includes('all')) active.add('all'); else types.forEach(t => active.add(t));
-    flowButtons.forEach(btn => {
-      const id = btn.id.startsWith('btn-flow-') ? btn.id.slice(9) : (btn.dataset.flowType || '');
-      const isOn = active.has('all') ? id === 'all' : active.has(id);
-      btn.classList.toggle('active', isOn);
-    });
-    renderFlows();
-  }
-
-  function filterFlowsForEntity(targetId){
-    const map = {
-      'info-ggp': ['ggp'],
-      'info-cng': ['ggp'],
-      'info-ffc': ['ffc'],
-      'info-ggcg':['ggcg'],
-      'info-mohv':['mohv'],
-      'info-ie' : ['ie']
-    };
-    const want = map[targetId];
-    if (!want) return;
-    const same = want.length === active.size && want.every(t => active.has(t));
-    setActiveFlowsTo(same ? ['all'] : want);
-  }
-
-  flowButtons.forEach(btn => btn.addEventListener('click', () => {
-    const id = btn.id.startsWith('btn-flow-') ? btn.id.slice(9) : (btn.dataset.flowType || '');
-    if (id === 'all') { setActiveFlowsTo(['all']); return; }
-    active.delete('all');
-    const turnOn = !btn.classList.contains('active');
-    btn.classList.toggle('active', turnOn);
-    if (turnOn) active.add(id); else active.delete(id);
-    if (active.size === 0) setActiveFlowsTo(['all']); else renderFlows();
-  }));
-  renderFlows();
-
-  // --- tile clicks: update panel/glow/FAQ/flows (no scroll) ---
-  boxes.forEach(b => b.addEventListener('click', () => {
-    const targetId = b.dataset.target;
-    setInfo(targetId);
-    applyGlow(b);
-    openRelatedFaq(targetId);
-    filterFlowsForEntity(targetId);
-  }));
-
-  // --- FAQ accordion ---
-  const faqToggles = document.querySelectorAll('.faq-toggle');
-  faqToggles.forEach(toggle => {
-    toggle.addEventListener('click', () => {
-      const content = toggle.nextElementSibling;
-      const isOpen  = content.classList.contains('open');
-      document.querySelectorAll('.faq-content.open').forEach(el => {
-        el.classList.remove('open');
-        el.previousElementSibling.classList.remove('open');
-      });
-      if (!isOpen) { content.classList.add('open'); toggle.classList.add('open'); }
-    });
-  });
-
-  // Auto-open two FAQs
-  const hog = document.querySelector('.faq-toggle[data-faq="hogcreek"]');
-  if (hog) { hog.classList.add('open'); hog.nextElementSibling?.classList.add('open'); }
-  const sm  = document.querySelector('.faq-toggle[data-faq="smllc"]');
-  if (sm)  { sm.classList.add('open'); sm.nextElementSibling?.classList.add('open'); }
-
-  // Gates
-  const btnShowTrust = document.getElementById('btn-show-trust');
-  const diagramTrust = document.getElementById('diagram-trust');
-  const btnTextTrust = document.getElementById('btn-text-trust');
-  if (btnShowTrust && diagramTrust && btnTextTrust){
-    if (diagramTrust.classList.contains('open')) btnTextTrust.textContent='Hide Fortress Diagram';
-    btnShowTrust.addEventListener('click', () => {
-      const isOpen = diagramTrust.classList.toggle('open');
-      btnTextTrust.textContent = isOpen ? 'Hide Fortress Diagram' : 'Show Fortress Diagram';
-    });
-  }
-
-  const btnShowIp = document.getElementById('btn-show-ip');
-  const diagramIp = document.getElementById('diagram-ip');
-  const btnTextIp = document.getElementById('btn-text-ip');
-  if (btnShowIp && diagramIp && btnTextIp){
-    if (diagramIp.classList.contains('open')) btnTextIp.textContent='Hide IP Flow Diagram';
-    btnShowIp.addEventListener('click', () => {
-      const isOpen = diagramIp.classList.toggle('open');
-      btnTextIp.textContent = isOpen ? 'Hide IP Flow Diagram' : 'Show IP Flow Diagram';
-    });
-  }
-});
-  </script>
-
-  <!-- Optional enhancements JS (ensure this file exists in repo root or remove this line) -->
-<script src="immersive-enhancements.js" defer></script>
 </body>
 </html>
+
