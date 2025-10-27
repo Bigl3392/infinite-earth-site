@@ -593,6 +593,7 @@
       const infoPanel = document.getElementById('info-panel');
       const boxes = document.querySelectorAll('.diagram-box');
       let activeBoxEl = null;
+
 const infoContent = {
   'info-ie': {
     title: 'Infinite Earth (IE) — The Parent (6 Members)',
@@ -650,9 +651,7 @@ const infoContent = {
     color: 'border-slate-700'
   }
 };
-}
-      };
-      <script>
+
 // --- info panel ---
 function setInfo(id){
   const c = infoContent[id] || infoContent.default;
@@ -733,7 +732,6 @@ flowButtons.forEach(btn => btn.addEventListener('click', (e) => {
 renderFlows();
 
 // --- tile clicks: update panel/glow/FAQ/flows (no scroll) ---
-const boxes = document.querySelectorAll('.diagram-box');
 boxes.forEach(b => b.addEventListener('click', () => {
   const targetId = b.dataset.target;
   setInfo(targetId);
@@ -743,45 +741,44 @@ boxes.forEach(b => b.addEventListener('click', () => {
     filterFlowsForEntity(targetId);
   }
 }));
-</script>
 
+// FAQ accordion
+const faqToggles=document.querySelectorAll('.faq-toggle');
+faqToggles.forEach(toggle=>{
+  toggle.addEventListener('click',()=>{
+    const content=toggle.nextElementSibling; const isOpen=content.classList.contains('open');
+    document.querySelectorAll('.faq-content.open').forEach(el=>{el.classList.remove('open'); el.previousElementSibling.classList.remove('open');});
+    if(!isOpen){ content.classList.add('open'); toggle.classList.add('open'); }
+  });
+});
+// Auto-open two FAQs
+document.querySelector('.faq-toggle[data-faq="hogcreek"]')?.classList.add('open');
+document.querySelector('.faq-toggle[data-faq="hogcreek"]')?.nextElementSibling?.classList.add('open');
+document.querySelector('.faq-toggle[data-faq="smllc"]')?.classList.add('open');
+document.querySelector('.faq-toggle[data-faq="smllc"]')?.nextElementSibling?.classList.add('open');
 
-      // FAQ accordion
-      const faqToggles=document.querySelectorAll('.faq-toggle');
-      faqToggles.forEach(toggle=>{
-        toggle.addEventListener('click',()=>{
-          const content=toggle.nextElementSibling; const isOpen=content.classList.contains('open');
-          document.querySelectorAll('.faq-content.open').forEach(el=>{el.classList.remove('open'); el.previousElementSibling.classList.remove('open');});
-          if(!isOpen){ content.classList.add('open'); toggle.classList.add('open'); }
-        });
-      });
-      // Auto-open two FAQs
-      document.querySelector('.faq-toggle[data-faq="hogcreek"]')?.classList.add('open');
-      document.querySelector('.faq-toggle[data-faq="hogcreek"]')?.nextElementSibling?.classList.add('open');
-      document.querySelector('.faq-toggle[data-faq="smllc"]')?.classList.add('open');
-      document.querySelector('.faq-toggle[data-faq="smllc"]')?.nextElementSibling?.classList.add('open');
+// Gates
+const btnShowTrust=document.getElementById('btn-show-trust');
+const diagramTrust=document.getElementById('diagram-trust');
+const btnTextTrust=document.getElementById('btn-text-trust');
+if(btnShowTrust&&diagramTrust&&btnTextTrust){
+  if(diagramTrust.classList.contains('open')) btnTextTrust.textContent='Hide Fortress Diagram';
+  btnShowTrust.addEventListener('click',()=>{
+    const isOpen=diagramTrust.classList.toggle('open');
+    btnTextTrust.textContent=isOpen?'Hide Fortress Diagram':'Show Fortress Diagram';
+  });
+}
+const btnShowIp=document.getElementById('btn-show-ip');
+const diagramIp=document.getElementById('diagram-ip');
+const btnTextIp=document.getElementById('btn-text-ip');
+if(btnShowIp&&diagramIp&&btnTextIp){
+  if(diagramIp.classList.contains('open')) btnTextIp.textContent='Hide IP Flow Diagram';
+  btnShowIp.addEventListener('click',()=>{
+    const isOpen=diagramIp.classList.toggle('open');
+    btnTextIp.textContent=isOpen?'Hide IP Flow Diagram':'Show IP Flow Diagram';
+  });
+}
 
-      // Gates
-      const btnShowTrust=document.getElementById('btn-show-trust');
-      const diagramTrust=document.getElementById('diagram-trust');
-      const btnTextTrust=document.getElementById('btn-text-trust');
-      if(btnShowTrust&&diagramTrust&&btnTextTrust){
-        if(diagramTrust.classList.contains('open')) btnTextTrust.textContent='Hide Fortress Diagram';
-        btnShowTrust.addEventListener('click',()=>{
-          const isOpen=diagramTrust.classList.toggle('open');
-          btnTextTrust.textContent=isOpen?'Hide Fortress Diagram':'Show Fortress Diagram';
-        });
-      }
-      const btnShowIp=document.getElementById('btn-show-ip');
-      const diagramIp=document.getElementById('diagram-ip');
-      const btnTextIp=document.getElementById('btn-text-ip');
-      if(btnShowIp&&diagramIp&&btnTextIp){
-        if(diagramIp.classList.contains('open')) btnTextIp.textContent='Hide IP Flow Diagram';
-        btnShowIp.addEventListener('click',()=>{
-          const isOpen=diagramIp.classList.toggle('open');
-          btnTextIp.textContent=isOpen?'Hide IP Flow Diagram':'Show IP Flow Diagram';
-        });
-      }
     });
   </script>
 
