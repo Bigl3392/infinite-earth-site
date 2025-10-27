@@ -587,70 +587,223 @@
     </section>
   </div>
 
-  <!-- Core interactivity -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const infoPanel = document.getElementById('info-panel');
-      const boxes = document.querySelectorAll('.diagram-box');
-      let activeBoxEl = null;
+<!-- Core interactivity -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const infoPanel = document.getElementById('info-panel');
+  const boxes = document.querySelectorAll('.diagram-box');
+  let activeBoxEl = null;
 
-const infoContent = {
-  'info-ie': {
-    title: 'Infinite Earth (IE) — The Parent (6 Members)',
-    text: `
-      <p class="mb-3"><span class="chaos">Without the system:</span> One giant, messy LLC. Cross-contamination of cash and risk. One dispute derails everything.</p>
-      <p><span class="system">With the system:</span> IE is the shield and the steering wheel. Members get a personal + inter-business shield; the Board sets guardrails and operators execute within them.</p>
-    `,
-    color: 'border-blue-500'
-  },
-  'info-ggp': {
-    title: 'Grumpy Goat Pizza (GGP) — The Operator',
-    text: `
-      <p class="mb-3"><span class="chaos">Without the system:</span> GGP owns the truck/building/loan. A single accident can take the whole shop and brand with it.</p>
-      <p><span class="system">With the system:</span> GGP focuses only on selling pizza. Pays <em>rent</em> (MOHV) and <em>loan</em> (GGCG). Risk is isolated; operations stay fast.</p>
-    `,
-    color: 'border-slate-500'
-  },
-  'info-cng': {
-    title: 'Crumb n Get It (CNG) — The Operator',
-    text: `
-      <p class="mb-3"><span class="chaos">Without the system:</span> Money mixes with GGP; a GGP claim can seize CNG cash and ovens.</p>
-      <p><span class="system">With the system:</span> CNG runs in its own protected lane under IE. Success isn’t punished by someone else’s risk.</p>
-    `,
-    color: 'border-slate-500'
-  },
-  'info-ffc': {
-    title: 'Fulcrum Fortress (FFC) — Shared Support',
-    text: `
-      <p class="mb-3"><span class="chaos">Without the system:</span> Each company reinvents bookkeeping, ops, and hiring. Inconsistent quality and duplicated effort.</p>
-      <p><span class="system">With the system:</span> Solve once, share always. FFC standardizes finance, HR, ops playbooks, and tooling via MSA.</p>
-    `,
-    color: 'border-slate-500'
-  },
-  'info-mohv': {
-    title: 'My Okie Heart (MOHV) — Allied Landlord',
-    text: `
-      <p class="mb-3"><span class="chaos">Without the system:</span> Hard assets sit inside ops; lawsuits can seize the building/truck.</p>
-      <p><span class="system">With the system:</span> MOHV owns the building/truck and leases to operators. It’s outside IE—an extra wall of protection around the crown jewels.</p>
-    `,
-    color: 'border-amber-400'
-  },
-  'info-ggcg': {
-    title: 'Grumpy Goat Capital (GGCG) — Allied Bank',
-    text: `
-      <p class="mb-3"><span class="chaos">Without the system:</span> Debt sits on IE/GGP; a default or claim can cascade through the stack.</p>
-      <p><span class="system">With the system:</span> GGCG isolates borrowing and formal intercompany loans. Banks see clean risk compartments; the group keeps flexibility.</p>
-    `,
-    color: 'border-indigo-400'
-  },
-  'default': {
-    title: 'A System for Stability',
-    text: `
-      Click a tile to see its role. The fortress creates clean, arm’s-length flows (rent, loans, MSAs), isolates risk, and keeps decisions crisp.
-    `,
-    color: 'border-slate-700'
+  // --- content ---
+  const infoContent = {
+    'info-ie': {
+      title: 'Infinite Earth (IE) — The Parent (6 Members)',
+      text: `
+        <p class="mb-3"><span class="chaos">Without the system:</span> One giant, messy LLC. Cross-contamination of cash and risk. One dispute derails everything.</p>
+        <p><span class="system">With the system:</span> IE is the shield and the steering wheel. Members get a personal + inter-business shield; the Board sets guardrails and operators execute within them.</p>
+      `,
+      color: 'border-blue-500'
+    },
+    'info-ggp': {
+      title: 'Grumpy Goat Pizza (GGP) — The Operator',
+      text: `
+        <p class="mb-3"><span class="chaos">Without the system:</span> GGP owns the truck/building/loan. A single accident can take the whole shop and brand with it.</p>
+        <p><span class="system">With the system:</span> GGP focuses only on selling pizza. Pays <em>rent</em> (MOHV) and <em>loan</em> (GGCG). Risk is isolated; operations stay fast.</p>
+      `,
+      color: 'border-slate-500'
+    },
+    'info-cng': {
+      title: 'Crumb n Get It (CNG) — The Operator',
+      text: `
+        <p class="mb-3"><span class="chaos">Without the system:</span> Money mixes with GGP; a GGP claim can seize CNG cash and ovens.</p>
+        <p><span class="system">With the system:</span> CNG runs in its own protected lane under IE. Success isn’t punished by someone else’s risk.</p>
+      `,
+      color: 'border-slate-500'
+    },
+    'info-ffc': {
+      title: 'Fulcrum Fortress (FFC) — Shared Support',
+      text: `
+        <p class="mb-3"><span class="chaos">Without the system:</span> Each company reinvents bookkeeping, ops, and hiring. Inconsistent quality and duplicated effort.</p>
+        <p><span class="system">With the system:</span> Solve once, share always. FFC standardizes finance, HR, ops playbooks, and tooling via MSA.</p>
+      `,
+      color: 'border-slate-500'
+    },
+    'info-mohv': {
+      title: 'My Okie Heart (MOHV) — Allied Landlord',
+      text: `
+        <p class="mb-3"><span class="chaos">Without the system:</span> Hard assets sit inside ops; lawsuits can seize the building/truck.</p>
+        <p><span class="system">With the system:</span> MOHV owns the building/truck and leases to operators. It’s outside IE—an extra wall of protection around the crown jewels.</p>
+      `,
+      color: 'border-amber-400'
+    },
+    'info-ggcg': {
+      title: 'Grumpy Goat Capital (GGCG) — Allied Bank',
+      text: `
+        <p class="mb-3"><span class="chaos">Without the system:</span> Debt sits on IE/GGP; a default or claim can cascade through the stack.</p>
+        <p><span class="system">With the system:</span> GGCG isolates borrowing and formal intercompany loans. Banks see clean risk compartments; the group keeps flexibility.</p>
+      `,
+      color: 'border-indigo-400'
+    },
+    'default': {
+      title: 'A System for Stability',
+      text: `Click a tile to see its role. The fortress creates clean, arm’s-length flows (rent, loans, MSAs), isolates risk, and keeps decisions crisp.`,
+      color: 'border-slate-700'
+    }
+  };
+
+  // --- helpers ---
+  function setInfo(id){
+    const c = infoContent[id] || infoContent.default;
+    infoPanel.innerHTML =
+      `<h3 class="text-2xl font-semibold text-white mb-4">${c.title}</h3>
+       <div class="text-gray-300 text-lg space-y-3 leading-relaxed">${c.text}</div>`;
+    infoPanel.className =
+      `bg-slate-800 rounded-lg p-6 md:p-8 min-h-[160px] transition-all duration-300 shadow-xl border-2 info-panel-content ${c.color}`;
   }
-};
+  setInfo('default');
+
+  function openRelatedFaq(targetId){
+    let faqKey = null;
+    if (targetId==='info-mohv' || targetId==='info-ggcg') faqKey='hogcreek';
+    else if (targetId==='info-ggp') faqKey='units';
+    else if (targetId==='info-ie' || targetId==='info-ffc') faqKey='shields';
+    if (!faqKey) return;
+
+    const toggle  = document.querySelector(`.faq-toggle[data-faq="${faqKey}"]`);
+    if (!toggle) return;
+    const content = toggle.nextElementSibling;
+
+    if (!content.classList.contains('open')) {
+      document.querySelectorAll('.faq-content.open').forEach(el => {
+        el.classList.remove('open');
+        el.previousElementSibling.classList.remove('open');
+      });
+      content.classList.add('open');
+      toggle.classList.add('open');
+    }
+    // no auto-scroll (prevents jumping)
+  }
+
+  function applyGlow(boxEl){
+    if (activeBoxEl) {
+      activeBoxEl.classList.remove('active-box','active-glow-blue','active-glow-amber','active-glow-indigo','active-glow-slate');
+    }
+    const glow = boxEl.getAttribute('data-glow');
+    boxEl.classList.add('active-box');
+    if (glow) boxEl.classList.add(`active-glow-${glow}`);
+    activeBoxEl = boxEl;
+  }
+
+  // --- flows (keep current behavior if present) ---
+  const flowButtons = document.querySelectorAll('.flow-btn');
+  const flowPaths   = document.querySelectorAll('.flow-path');
+  let active = new Set(['all']);
+  const rule = {
+    all : () => true,
+    ggp : d => d.includes('ggp'),
+    ffc : d => d.includes('ffc'),
+    ggcg: d => d.includes('ggcg'),
+    mohv: d => d.includes('mohv'),
+    ie  : d => d.includes('ie')
+  };
+  function renderFlows(){
+    if (active.has('all')) { flowPaths.forEach(p => p.style.opacity='1');   return; }
+    if (active.size===0)   { flowPaths.forEach(p => p.style.opacity='0.1'); return; }
+    flowPaths.forEach(p => {
+      const d = p.dataset.flow; let v = false;
+      active.forEach(t => { if (rule[t] && rule[t](d)) v = true; });
+      p.style.opacity = v ? '1' : '0.1';
+    });
+  }
+  flowButtons.forEach(btn => btn.addEventListener('click', (e) => {
+    const id = e.currentTarget.id || '';
+    const t  = id.startsWith('btn-flow-') ? id.substring(9) : (e.currentTarget.dataset.flowType || '');
+    if (t === 'all') {
+      active.clear(); active.add('all');
+      flowButtons.forEach(b => b.classList.toggle('active', b === btn));
+    } else {
+      active.delete('all');
+      const isActive = btn.classList.toggle('active');
+      if (isActive) active.add(t); else active.delete(t);
+      document.getElementById('btn-flow-all')?.classList.remove('active');
+      if (active.size === 0) { active.add('all'); document.getElementById('btn-flow-all')?.classList.add('active'); }
+    }
+    renderFlows();
+  }));
+  renderFlows();
+
+  // Optional: entity → flow filter hook (safe no-op if undefined)
+  function filterFlowsForEntity(targetId){
+    const mapping = {
+      'info-ggp': ['ggp'],
+      'info-cng': ['ggp'],
+      'info-ffc': ['ffc'],
+      'info-ggcg': ['ggcg'],
+      'info-mohv': ['mohv'],
+      'info-ie': ['ie']
+    };
+    const types = mapping[targetId];
+    if (!types) return;
+
+    active.clear();
+    types.forEach(t => active.add(t));
+    // update button UI
+    flowButtons.forEach(b => {
+      const id = b.id || '';
+      const t  = id.startsWith('btn-flow-') ? id.substring(9) : (b.dataset.flowType || '');
+      b.classList.toggle('active', types.includes(t));
+    });
+    document.getElementById('btn-flow-all')?.classList.remove('active');
+    renderFlows();
+  }
+
+  // --- tile clicks (no scrolling) ---
+  boxes.forEach(b => b.addEventListener('click', () => {
+    const targetId = b.dataset.target;
+    setInfo(targetId);
+    applyGlow(b);
+    openRelatedFaq(targetId);
+    filterFlowsForEntity(targetId);
+  }));
+
+  // --- FAQ accordion ---
+  const faqToggles = document.querySelectorAll('.faq-toggle');
+  faqToggles.forEach(toggle => {
+    toggle.addEventListener('click', () => {
+      const content = toggle.nextElementSibling;
+      const isOpen  = content.classList.contains('open');
+      document.querySelectorAll('.faq-content.open').forEach(openEl => {
+        openEl.classList.remove('open');
+        openEl.previousElementSibling.classList.remove('open');
+      });
+      if (!isOpen) { content.classList.add('open'); toggle.classList.add('open'); }
+    });
+  });
+
+  // --- Gates toggles ---
+  const btnShowTrust = document.getElementById('btn-show-trust');
+  const diagramTrust = document.getElementById('diagram-trust');
+  const btnTextTrust = document.getElementById('btn-text-trust');
+  if (btnShowTrust && diagramTrust && btnTextTrust) {
+    if (diagramTrust.classList.contains('open')) btnTextTrust.textContent = 'Hide Fortress Diagram';
+    btnShowTrust.addEventListener('click', () => {
+      const isOpen = diagramTrust.classList.toggle('open');
+      btnTextTrust.textContent = isOpen ? 'Hide Fortress Diagram' : 'Show Fortress Diagram';
+    });
+  }
+  const btnShowIp = document.getElementById('btn-show-ip');
+  const diagramIp = document.getElementById('diagram-ip');
+  const btnTextIp = document.getElementById('btn-text-ip');
+  if (btnShowIp && diagramIp && btnTextIp) {
+    if (diagramIp.classList.contains('open')) btnTextIp.textContent = 'Hide IP Flow Diagram';
+    btnShowIp.addEventListener('click', () => {
+      const isOpen = diagramIp.classList.toggle('open');
+      btnTextIp.textContent = isOpen ? 'Hide IP Flow Diagram' : 'Show IP Flow Diagram';
+    });
+  }
+}); // <— closes DOMContentLoaded
+</script>
+
 
 // --- info panel ---
 function setInfo(id){
