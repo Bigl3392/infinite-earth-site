@@ -24,15 +24,16 @@ jobs:
       - name: Install deps
         run: npm ci || npm i
 
-      - name: Build CSS + inject filename
+      -       - name: Build CSS + inject bundle filename
         run: |
-          mkdir -p assets
-          TS="$(date +%Y%m%d%H%M%S)"
+          set -e
+          TS=$(date +%F)
           OUT="assets/build.v${TS}.css"
-          npx tailwindcss -i ./src/input.css -o "$OUT" --minify
-          # Replace template token with just the filename
+          mkdir -p assets
+          ./node_modules/.bin/tailwindcss -i ./src/input.css -o "./$OUT" --minify
           sed -i.bak "s|{{CSS_BUNDLE}}|$(basename "$OUT")|g" index.html
           rm -f index.html.bak
+
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
