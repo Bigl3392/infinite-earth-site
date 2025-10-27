@@ -677,13 +677,14 @@
       renderFlows();
 
       // Click on boxes: update panel, glow, FAQ, and scroll to decision guide for context
-      boxes.forEach(b=>b.addEventListener('click',()=>{
-        const targetId=b.dataset.target;
-        setInfo(targetId);
-        applyGlow(b);
-        openRelatedFaq(targetId);
-        const guide=document.getElementById('decision-guide');
-        if(guide) guide.scrollIntoView({behavior:'smooth',block:'start'});
+     boxes.forEach(b => b.addEventListener('click', () => {
+  const targetId = b.dataset.target;
+  setInfo(targetId);
+  applyGlow(b);
+  openRelatedFaq(targetId);
+  filterFlowsForEntity(targetId);
+  // (removed auto-scroll)
+});
       }));
 
       // FAQ accordion
