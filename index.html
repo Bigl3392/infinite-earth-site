@@ -620,7 +620,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const boxes = document.querySelectorAll('.diagram-box');
   let activeBoxEl = null;
 
-  // --- content ---
   const infoContent = {
     'info-ie': {
       title: 'Infinite Earth (IE) — The Parent (6 Members)',
@@ -677,28 +676,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // --- helpers ---
+  // --- info panel ---
   function setInfo(id){
     const c = infoContent[id] || infoContent.default;
     infoPanel.innerHTML =
       `<h3 class="text-2xl font-semibold text-white mb-4">${c.title}</h3>
-       <div class="text-gray-300 text-lg space-y-3 leading-relaxed">${c.text}</div>`;
+       <div class="text-gray-300 text-lg space-y-4">${c.text}</div>`;
     infoPanel.className =
       `bg-slate-800 rounded-lg p-6 md:p-8 min-h-[160px] transition-all duration-300 shadow-xl border-2 info-panel-content ${c.color}`;
   }
   setInfo('default');
 
+  // --- open related FAQ (no scrolling) ---
   function openRelatedFaq(targetId){
     let faqKey = null;
     if (targetId==='info-mohv' || targetId==='info-ggcg') faqKey='hogcreek';
     else if (targetId==='info-ggp') faqKey='units';
     else if (targetId==='info-ie' || targetId==='info-ffc') faqKey='shields';
     if (!faqKey) return;
-
-    const toggle  = document.querySelector(`.faq-toggle[data-faq="${faqKey}"]`);
+    const toggle = document.querySelector(`.faq-toggle[data-faq="${faqKey}"]`);
     if (!toggle) return;
     const content = toggle.nextElementSibling;
-
     if (!content.classList.contains('open')) {
       document.querySelectorAll('.faq-content.open').forEach(el => {
         el.classList.remove('open');
@@ -707,12 +705,14 @@ document.addEventListener('DOMContentLoaded', () => {
       content.classList.add('open');
       toggle.classList.add('open');
     }
-    // no auto-scroll (prevents jumping)
   }
 
+  // --- glow helper ---
   function applyGlow(boxEl){
     if (activeBoxEl) {
-      activeBoxEl.classList.remove('active-box','active-glow-blue','active-glow-amber','active-glow-indigo','active-glow-slate');
+      activeBoxEl.classList.remove(
+        'active-box','active-glow-blue','active-glow-amber','active-glow-indigo','active-glow-slate'
+      );
     }
     const glow = boxEl.getAttribute('data-glow');
     boxEl.classList.add('active-box');
@@ -720,10 +720,11 @@ document.addEventListener('DOMContentLoaded', () => {
     activeBoxEl = boxEl;
   }
 
-  // --- flows (keep current behavior if present) ---
+  // --- flow multi-select ---
   const flowButtons = document.querySelectorAll('.flow-btn');
   const flowPaths   = document.querySelectorAll('.flow-path');
-  let active = new Set(['all']);
+  const active = new Set(['all']);
+
   const rule = {
     all : () => true,
     ggp : d => d.includes('ggp'),
@@ -732,58 +733,56 @@ document.addEventListener('DOMContentLoaded', () => {
     mohv: d => d.includes('mohv'),
     ie  : d => d.includes('ie')
   };
+
   function renderFlows(){
-    if (active.has('all')) { flowPaths.forEach(p => p.style.opacity='1');   return; }
-    if (active.size===0)   { flowPaths.forEach(p => p.style.opacity='0.1'); return; }
+    if (active.has('all')) { flowPaths.forEach(p => p.style.opacity='1'); return; }
+    if (active.size===0)    { flowPaths.forEach(p => p.style.opacity='0.1'); return; }
     flowPaths.forEach(p => {
-      const d = p.dataset.flow; let v = false;
+      const d = p.dataset.flow || '';
+      let v = false;
       active.forEach(t => { if (rule[t] && rule[t](d)) v = true; });
       p.style.opacity = v ? '1' : '0.1';
     });
   }
-  flowButtons.forEach(btn => btn.addEventListener('click', (e) => {
-    const id = e.currentTarget.id || '';
-    const t  = id.startsWith('btn-flow-') ? id.substring(9) : (e.currentTarget.dataset.flowType || '');
-    if (t === 'all') {
-      active.clear(); active.add('all');
-      flowButtons.forEach(b => b.classList.toggle('active', b === btn));
-    } else {
-      active.delete('all');
-      const isActive = btn.classList.toggle('active');
-      if (isActive) active.add(t); else active.delete(t);
-      document.getElementById('btn-flow-all')?.classList.remove('active');
-      if (active.size === 0) { active.add('all'); document.getElementById('btn-flow-all')?.classList.add('active'); }
-    }
-    renderFlows();
-  }));
-  renderFlows();
 
-  // Optional: entity → flow filter hook (safe no-op if undefined)
-  function filterFlowsForEntity(targetId){
-    const mapping = {
-      'info-ggp': ['ggp'],
-      'info-cng': ['ggp'],
-      'info-ffc': ['ffc'],
-      'info-ggcg': ['ggcg'],
-      'info-mohv': ['mohv'],
-      'info-ie': ['ie']
-    };
-    const types = mapping[targetId];
-    if (!types) return;
-
+  function setActiveFlowsTo(types){
     active.clear();
-    types.forEach(t => active.add(t));
-    // update button UI
-    flowButtons.forEach(b => {
-      const id = b.id || '';
-      const t  = id.startsWith('btn-flow-') ? id.substring(9) : (b.dataset.flowType || '');
-      b.classList.toggle('active', types.includes(t));
+    if (types.includes('all')) active.add('all'); else types.forEach(t => active.add(t));
+    flowButtons.forEach(btn => {
+      const id = btn.id.startsWith('btn-flow-') ? btn.id.slice(9) : (btn.dataset.flowType || '');
+      const isOn = active.has('all') ? id === 'all' : active.has(id);
+      btn.classList.toggle('active', isOn);
     });
-    document.getElementById('btn-flow-all')?.classList.remove('active');
     renderFlows();
   }
 
-  // --- tile clicks (no scrolling) ---
+  function filterFlowsForEntity(targetId){
+    const map = {
+      'info-ggp': ['ggp'],
+      'info-cng': ['ggp'],
+      'info-ffc': ['ffc'],
+      'info-ggcg':['ggcg'],
+      'info-mohv':['mohv'],
+      'info-ie' : ['ie']
+    };
+    const want = map[targetId];
+    if (!want) return;
+    const same = want.length === active.size && want.every(t => active.has(t));
+    setActiveFlowsTo(same ? ['all'] : want);
+  }
+
+  flowButtons.forEach(btn => btn.addEventListener('click', () => {
+    const id = btn.id.startsWith('btn-flow-') ? btn.id.slice(9) : (btn.dataset.flowType || '');
+    if (id === 'all') { setActiveFlowsTo(['all']); return; }
+    active.delete('all');
+    const turnOn = !btn.classList.contains('active');
+    btn.classList.toggle('active', turnOn);
+    if (turnOn) active.add(id); else active.delete(id);
+    if (active.size === 0) setActiveFlowsTo(['all']); else renderFlows();
+  }));
+  renderFlows();
+
+  // --- tile clicks: update panel/glow/FAQ/flows (no scroll) ---
   boxes.forEach(b => b.addEventListener('click', () => {
     const targetId = b.dataset.target;
     setInfo(targetId);
@@ -798,167 +797,43 @@ document.addEventListener('DOMContentLoaded', () => {
     toggle.addEventListener('click', () => {
       const content = toggle.nextElementSibling;
       const isOpen  = content.classList.contains('open');
-      document.querySelectorAll('.faq-content.open').forEach(openEl => {
-        openEl.classList.remove('open');
-        openEl.previousElementSibling.classList.remove('open');
+      document.querySelectorAll('.faq-content.open').forEach(el => {
+        el.classList.remove('open');
+        el.previousElementSibling.classList.remove('open');
       });
       if (!isOpen) { content.classList.add('open'); toggle.classList.add('open'); }
     });
   });
 
-  // --- Gates toggles ---
+  // Auto-open two FAQs
+  const hog = document.querySelector('.faq-toggle[data-faq="hogcreek"]');
+  if (hog) { hog.classList.add('open'); hog.nextElementSibling?.classList.add('open'); }
+  const sm  = document.querySelector('.faq-toggle[data-faq="smllc"]');
+  if (sm)  { sm.classList.add('open'); sm.nextElementSibling?.classList.add('open'); }
+
+  // Gates
   const btnShowTrust = document.getElementById('btn-show-trust');
   const diagramTrust = document.getElementById('diagram-trust');
   const btnTextTrust = document.getElementById('btn-text-trust');
-  if (btnShowTrust && diagramTrust && btnTextTrust) {
-    if (diagramTrust.classList.contains('open')) btnTextTrust.textContent = 'Hide Fortress Diagram';
+  if (btnShowTrust && diagramTrust && btnTextTrust){
+    if (diagramTrust.classList.contains('open')) btnTextTrust.textContent='Hide Fortress Diagram';
     btnShowTrust.addEventListener('click', () => {
       const isOpen = diagramTrust.classList.toggle('open');
       btnTextTrust.textContent = isOpen ? 'Hide Fortress Diagram' : 'Show Fortress Diagram';
     });
   }
+
   const btnShowIp = document.getElementById('btn-show-ip');
   const diagramIp = document.getElementById('diagram-ip');
   const btnTextIp = document.getElementById('btn-text-ip');
-  if (btnShowIp && diagramIp && btnTextIp) {
-    if (diagramIp.classList.contains('open')) btnTextIp.textContent = 'Hide IP Flow Diagram';
+  if (btnShowIp && diagramIp && btnTextIp){
+    if (diagramIp.classList.contains('open')) btnTextIp.textContent='Hide IP Flow Diagram';
     btnShowIp.addEventListener('click', () => {
       const isOpen = diagramIp.classList.toggle('open');
       btnTextIp.textContent = isOpen ? 'Hide IP Flow Diagram' : 'Show IP Flow Diagram';
     });
   }
-}); // <— closes DOMContentLoaded
-</script>
-
-
-// --- info panel ---
-function setInfo(id){
-  const c = infoContent[id] || infoContent.default;
-  infoPanel.innerHTML = `<h3 class="text-2xl font-semibold text-white mb-4">${c.title}</h3><div class="text-gray-300 text-lg space-y-4">${c.text}</div>`;
-  infoPanel.className = `bg-slate-800 rounded-lg p-6 md:p-8 min-h-[160px] transition-all duration-300 shadow-xl border-2 info-panel-content ${c.color}`;
-}
-setInfo('default');
-
-// --- open related FAQ (no scrolling) ---
-function openRelatedFaq(targetId){
-  let faqKey = null;
-  if (targetId==='info-mohv' || targetId==='info-ggcg') faqKey='hogcreek';
-  else if (targetId==='info-ggp') faqKey='units';
-  else if (targetId==='info-ie' || targetId==='info-ffc') faqKey='shields';
-  if (!faqKey) return;
-
-  const toggle = document.querySelector(`.faq-toggle[data-faq="${faqKey}"]`);
-  if (!toggle) return;
-
-  const content = toggle.nextElementSibling;
-  if (!content.classList.contains('open')) {
-    document.querySelectorAll('.faq-content.open').forEach(el => {
-      el.classList.remove('open');
-      el.previousElementSibling.classList.remove('open');
-    });
-    content.classList.add('open');
-    toggle.classList.add('open');
-  }
-  // Removed: auto-scroll to FAQ (this was causing the jump)
-  // toggle.scrollIntoView({behavior:'smooth', block:'center'});
-}
-
-// --- glow helper ---
-function applyGlow(boxEl){
-  if (activeBoxEl) activeBoxEl.classList.remove('active-box','active-glow-blue','active-glow-amber','active-glow-indigo','active-glow-slate');
-  const glow = boxEl.getAttribute('data-glow');
-  boxEl.classList.add('active-box');
-  if (glow) boxEl.classList.add(`active-glow-${glow}`);
-  activeBoxEl = boxEl;
-}
-
-// --- flow multi-select ---
-const flowButtons = document.querySelectorAll('.flow-btn');
-const flowPaths   = document.querySelectorAll('.flow-path');
-let active = new Set(['all']);
-const rule = {
-  all : () => true,
-  ggp : d => d.includes('ggp'),
-  ffc : d => d.includes('ffc'),
-  ggcg: d => d.includes('ggcg'),
-  mohv: d => d.includes('mohv'),
-  ie  : d => d.includes('ie')
-};
-function renderFlows(){
-  if (active.has('all')) { flowPaths.forEach(p => p.style.opacity='1');   return; }
-  if (active.size===0)   { flowPaths.forEach(p => p.style.opacity='0.1'); return; }
-  flowPaths.forEach(p => {
-    const d = p.dataset.flow; let v = false;
-    active.forEach(t => { if (rule[t] && rule[t](d)) v = true; });
-    p.style.opacity = v ? '1' : '0.1';
-  });
-}
-flowButtons.forEach(btn => btn.addEventListener('click', (e) => {
-  const id = e.currentTarget.id || '';
-  const t  = id.startsWith('btn-flow-') ? id.substring(9) : (e.currentTarget.dataset.flowType || '');
-  if (t === 'all') {
-    active.clear(); active.add('all');
-    flowButtons.forEach(b => b.classList.toggle('active', b === btn));
-  } else {
-    active.delete('all');
-    const isActive = btn.classList.toggle('active');
-    if (isActive) active.add(t); else active.delete(t);
-    document.getElementById('btn-flow-all')?.classList.remove('active');
-    if (active.size === 0) { active.add('all'); document.getElementById('btn-flow-all')?.classList.add('active'); }
-  }
-  renderFlows();
-}));
-renderFlows();
-
-// --- tile clicks: update panel/glow/FAQ/flows (no scroll) ---
-boxes.forEach(b => b.addEventListener('click', () => {
-  const targetId = b.dataset.target;
-  setInfo(targetId);
-  applyGlow(b);
-  openRelatedFaq(targetId);
-  if (typeof filterFlowsForEntity === 'function') {
-    filterFlowsForEntity(targetId);
-  }
-}));
-
-// FAQ accordion
-const faqToggles=document.querySelectorAll('.faq-toggle');
-faqToggles.forEach(toggle=>{
-  toggle.addEventListener('click',()=>{
-    const content=toggle.nextElementSibling; const isOpen=content.classList.contains('open');
-    document.querySelectorAll('.faq-content.open').forEach(el=>{el.classList.remove('open'); el.previousElementSibling.classList.remove('open');});
-    if(!isOpen){ content.classList.add('open'); toggle.classList.add('open'); }
-  });
 });
-// Auto-open two FAQs
-document.querySelector('.faq-toggle[data-faq="hogcreek"]')?.classList.add('open');
-document.querySelector('.faq-toggle[data-faq="hogcreek"]')?.nextElementSibling?.classList.add('open');
-document.querySelector('.faq-toggle[data-faq="smllc"]')?.classList.add('open');
-document.querySelector('.faq-toggle[data-faq="smllc"]')?.nextElementSibling?.classList.add('open');
-
-// Gates
-const btnShowTrust=document.getElementById('btn-show-trust');
-const diagramTrust=document.getElementById('diagram-trust');
-const btnTextTrust=document.getElementById('btn-text-trust');
-if(btnShowTrust&&diagramTrust&&btnTextTrust){
-  if(diagramTrust.classList.contains('open')) btnTextTrust.textContent='Hide Fortress Diagram';
-  btnShowTrust.addEventListener('click',()=>{
-    const isOpen=diagramTrust.classList.toggle('open');
-    btnTextTrust.textContent=isOpen?'Hide Fortress Diagram':'Show Fortress Diagram';
-  });
-}
-const btnShowIp=document.getElementById('btn-show-ip');
-const diagramIp=document.getElementById('diagram-ip');
-const btnTextIp=document.getElementById('btn-text-ip');
-if(btnShowIp&&diagramIp&&btnTextIp){
-  if(diagramIp.classList.contains('open')) btnTextIp.textContent='Hide IP Flow Diagram';
-  btnShowIp.addEventListener('click',()=>{
-    const isOpen=diagramIp.classList.toggle('open');
-    btnTextIp.textContent=isOpen?'Hide IP Flow Diagram':'Show IP Flow Diagram';
-  });
-}
-
-    });
   </script>
 
   <!-- Optional enhancements JS (ensure this file exists in repo root or remove this line) -->
