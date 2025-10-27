@@ -652,78 +652,99 @@ const infoContent = {
 };
 }
       };
-      function setInfo(id){
-        const c = infoContent[id] || infoContent.default;
-        infoPanel.innerHTML = `<h3 class="text-2xl font-semibold text-white mb-4">${c.title}</h3><div class="text-gray-300 text-lg space-y-4">${c.text}</div>`;
-        infoPanel.className = `bg-slate-800 rounded-lg p-6 md:p-8 min-h-[160px] transition-all duration-300 shadow-xl border-2 info-panel-content ${c.color}`;
-      }
-      setInfo('default');
+      <script>
+// --- info panel ---
+function setInfo(id){
+  const c = infoContent[id] || infoContent.default;
+  infoPanel.innerHTML = `<h3 class="text-2xl font-semibold text-white mb-4">${c.title}</h3><div class="text-gray-300 text-lg space-y-4">${c.text}</div>`;
+  infoPanel.className = `bg-slate-800 rounded-lg p-6 md:p-8 min-h-[160px] transition-all duration-300 shadow-xl border-2 info-panel-content ${c.color}`;
+}
+setInfo('default');
 
-      function openRelatedFaq(targetId){
-        let faqKey=null;
-        if (targetId==='info-mohv'||targetId==='info-ggcg') faqKey='hogcreek';
-        else if (targetId==='info-ggp') faqKey='units';
-        else if (targetId==='info-ie'||targetId==='info-ffc') faqKey='shields';
-        if(!faqKey) return;
-        const toggle=document.querySelector(`.faq-toggle[data-faq="${faqKey}"]`);
-        if(!toggle) return;
-        const content=toggle.nextElementSibling;
-        if(!content.classList.contains('open')){
-          document.querySelectorAll('.faq-content.open').forEach(el=>{el.classList.remove('open'); el.previousElementSibling.classList.remove('open');});
-          content.classList.add('open'); toggle.classList.add('open');
-        }
-        toggle.scrollIntoView({behavior:'smooth',block:'center'});
-      }
+// --- open related FAQ (no scrolling) ---
+function openRelatedFaq(targetId){
+  let faqKey = null;
+  if (targetId==='info-mohv' || targetId==='info-ggcg') faqKey='hogcreek';
+  else if (targetId==='info-ggp') faqKey='units';
+  else if (targetId==='info-ie' || targetId==='info-ffc') faqKey='shields';
+  if (!faqKey) return;
 
-      function applyGlow(boxEl){
-        if(activeBoxEl) activeBoxEl.classList.remove('active-box','active-glow-blue','active-glow-amber','active-glow-indigo','active-glow-slate');
-        const glow=boxEl.getAttribute('data-glow');
-        boxEl.classList.add('active-box');
-        if(glow) boxEl.classList.add(`active-glow-${glow}`);
-        activeBoxEl=boxEl;
-      }
+  const toggle = document.querySelector(`.faq-toggle[data-faq="${faqKey}"]`);
+  if (!toggle) return;
 
-      // Flow multi-select
-      const flowButtons=document.querySelectorAll('.flow-btn');
-      const flowPaths=document.querySelectorAll('.flow-path');
-      let active=new Set(['all']);
-      const rule={
-        all:()=>true,
-        ggp:(d)=>d.includes('ggp'),
-        ffc:(d)=>d.includes('ffc'),
-        ggcg:(d)=>d.includes('ggcg'),
-        mohv:(d)=>d.includes('mohv'),
-        ie:(d)=>d.includes('ie')
-      };
-      function renderFlows(){
-        if(active.has('all')){ flowPaths.forEach(p=>p.style.opacity='1'); return; }
-        if(active.size===0){ flowPaths.forEach(p=>p.style.opacity='0.1'); return; }
-        flowPaths.forEach(p=>{const d=p.dataset.flow; let v=false; active.forEach(t=>{ if(rule[t]&&rule[t](d)) v=true; }); p.style.opacity=v?'1':'0.1';});
-      }
-      flowButtons.forEach(btn=>btn.addEventListener('click',(e)=>{
-        const id=e.currentTarget.id||''; const t=id.startsWith('btn-flow-')?id.substring(9):(e.currentTarget.dataset.flowType||'');
-        if(t==='all'){ active.clear(); active.add('all'); flowButtons.forEach(b=>b.classList.toggle('active',b===btn)); }
-        else {
-          active.delete('all');
-          const isActive=btn.classList.toggle('active');
-          if(isActive) active.add(t); else active.delete(t);
-          document.getElementById('btn-flow-all')?.classList.remove('active');
-          if(active.size===0){ active.add('all'); document.getElementById('btn-flow-all')?.classList.add('active'); }
-        }
-        renderFlows();
-      }));
-      renderFlows();
+  const content = toggle.nextElementSibling;
+  if (!content.classList.contains('open')) {
+    document.querySelectorAll('.faq-content.open').forEach(el => {
+      el.classList.remove('open');
+      el.previousElementSibling.classList.remove('open');
+    });
+    content.classList.add('open');
+    toggle.classList.add('open');
+  }
+  // Removed: auto-scroll to FAQ (this was causing the jump)
+  // toggle.scrollIntoView({behavior:'smooth', block:'center'});
+}
 
-      // Click on boxes: update panel, glow, FAQ, and scroll to decision guide for context
-     boxes.forEach(b => b.addEventListener('click', () => {
+// --- glow helper ---
+function applyGlow(boxEl){
+  if (activeBoxEl) activeBoxEl.classList.remove('active-box','active-glow-blue','active-glow-amber','active-glow-indigo','active-glow-slate');
+  const glow = boxEl.getAttribute('data-glow');
+  boxEl.classList.add('active-box');
+  if (glow) boxEl.classList.add(`active-glow-${glow}`);
+  activeBoxEl = boxEl;
+}
+
+// --- flow multi-select ---
+const flowButtons = document.querySelectorAll('.flow-btn');
+const flowPaths   = document.querySelectorAll('.flow-path');
+let active = new Set(['all']);
+const rule = {
+  all : () => true,
+  ggp : d => d.includes('ggp'),
+  ffc : d => d.includes('ffc'),
+  ggcg: d => d.includes('ggcg'),
+  mohv: d => d.includes('mohv'),
+  ie  : d => d.includes('ie')
+};
+function renderFlows(){
+  if (active.has('all')) { flowPaths.forEach(p => p.style.opacity='1');   return; }
+  if (active.size===0)   { flowPaths.forEach(p => p.style.opacity='0.1'); return; }
+  flowPaths.forEach(p => {
+    const d = p.dataset.flow; let v = false;
+    active.forEach(t => { if (rule[t] && rule[t](d)) v = true; });
+    p.style.opacity = v ? '1' : '0.1';
+  });
+}
+flowButtons.forEach(btn => btn.addEventListener('click', (e) => {
+  const id = e.currentTarget.id || '';
+  const t  = id.startsWith('btn-flow-') ? id.substring(9) : (e.currentTarget.dataset.flowType || '');
+  if (t === 'all') {
+    active.clear(); active.add('all');
+    flowButtons.forEach(b => b.classList.toggle('active', b === btn));
+  } else {
+    active.delete('all');
+    const isActive = btn.classList.toggle('active');
+    if (isActive) active.add(t); else active.delete(t);
+    document.getElementById('btn-flow-all')?.classList.remove('active');
+    if (active.size === 0) { active.add('all'); document.getElementById('btn-flow-all')?.classList.add('active'); }
+  }
+  renderFlows();
+}));
+renderFlows();
+
+// --- tile clicks: update panel/glow/FAQ/flows (no scroll) ---
+const boxes = document.querySelectorAll('.diagram-box');
+boxes.forEach(b => b.addEventListener('click', () => {
   const targetId = b.dataset.target;
   setInfo(targetId);
   applyGlow(b);
   openRelatedFaq(targetId);
-  filterFlowsForEntity(targetId);
-  // (removed auto-scroll)
-});
-      }));
+  if (typeof filterFlowsForEntity === 'function') {
+    filterFlowsForEntity(targetId);
+  }
+}));
+</script>
+
 
       // FAQ accordion
       const faqToggles=document.querySelectorAll('.faq-toggle');
