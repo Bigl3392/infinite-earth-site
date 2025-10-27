@@ -1,30 +1,46 @@
-﻿name: Build & Ship Static Site
+name: Build & Ship Static Site
+
 on:
   push:
     branches: [ main ]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build-ship:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
+
       - name: Install deps
+        run: npm ci || npm i
+
+      - name: Build CSS + inject filename
         run: |
-          npm ci || npm i -D tailwindcss postcss autoprefixer
-      - name: Build CSS + inject bundle token
-        run: |
-          TS=
-          OUT="assets/build.v.css"
-          npx tailwindcss -i ./src/input.css -o "./" --minify
-          sed -i.bak "s/{{CSS_BUNDLE}}/build.v.css/g" index.html
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+          mkdir -p assets
+          TS="$(date +%Y%m%d%H%M%S)"
+          OUT="assets/build.v${TS}.css"
+          npx tailwindcss -i ./src/input.css -o "$OUT" --minify
+          # Replace template token with just the filename
+          sed -i.bak "s|{{CSS_BUNDLE}}|$(basename "$OUT")|g" index.html
+          rm -f index.html.bak
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: .
-      - uses: actions/deploy-pages@v4
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
