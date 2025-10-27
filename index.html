@@ -66,6 +66,18 @@
     .info-panel-content .system{color:#4ade80;font-weight:600}
     .flow-path,.flow-text{transition:opacity .3s ease-in-out}
     .flow-text{pointer-events:none}
+    /* Flow labels: outlined + slightly larger so lines don't cut through */
+.flow-text{
+  pointer-events:none;
+  paint-order: stroke fill;
+  stroke:#0f172a;          /* outline color matches page bg */
+  stroke-width:3px;        /* halo thickness */
+  font-weight:600;
+  font-size:11px !important;
+}
+@media (min-width:768px){
+  .flow-text{ font-size:12px !important; }
+}
     .control-panel .flow-btn{background:#334155;color:#cbd5e1;transition:all .2s;border:1px solid #475569}
     .control-panel .flow-btn:hover{background:#475569;color:#fff; transform: translateY(-1px); box-shadow:0 2px 4px rgba(0,0,0,.2)}
     .control-panel .flow-btn.active{background:#2563eb;color:#fff;font-weight:600;border-color:#60a5fa;box-shadow:0 0 10px rgba(96,165,250,.5);transform:none}
@@ -566,7 +578,21 @@
         <p class="text-2xl font-bold text-yellow-300 mt-6">Systems over chaos is the only way to guard and sustain shared generational wealth.</p>
       </div>
     </section>
-
+<section id="tax-implications" class="mb-16">
+  <h2 class="text-3xl font-bold text-white text-center mb-8">Taxes & Compliance</h2>
+  <div class="max-w-3xl mx-auto bg-slate-800 rounded-lg border border-slate-700 p-6 md:p-8 space-y-4">
+    <p class="text-gray-300 text-lg">
+      Roll-up stays clean: GGP, CNG, FFC are SMLLCs/disregarded → reported on IE’s partnership return.
+      MOHV & GGCG are separate partnerships with their own 1065 + K-1s.
+    </p>
+    <ul class="list-disc pl-6 text-gray-300 text-lg space-y-2">
+      <li><span class="text-white font-semibold">IE (parent):</span> files one 1065; members receive K-1s.</li>
+      <li><span class="text-white font-semibold">GGP / CNG / FFC:</span> no separate return; expenses/profit flow into IE.</li>
+      <li><span class="text-white font-semibold">MOHV / GGCG:</span> file their own 1065s; arm’s-length rent/interest.</li>
+    </ul>
+    <p class="text-sm text-slate-400">Not tax advice; confirm with your CPA.</p>
+  </div>
+</section>
     <!-- Decision Guide -->
     <section id="decision-guide" class="mt-20 pt-16 border-t-2 border-slate-700">
       <h2 class="text-4xl font-bold text-white text-center mb-4">Your Decision Guide</h2>
