@@ -593,26 +593,64 @@
       const infoPanel = document.getElementById('info-panel');
       const boxes = document.querySelectorAll('.diagram-box');
       let activeBoxEl = null;
-      const infoContent = {
-        'info-ie': { title:'Infinite Earth (IE) - The Parent (6 Members)', text: `
-          <p class="mb-3"><span class="chaos">Without This System (Chaos):</span> One giant, messy LLC. All 6 members argue; a lawsuit against GGP could drain CNG.</p>
-          <p><span class="system">With This System (Order):</span> IE provides personal & inter-business shields. Board sets guardrails; operators run within them.</p>`, color:'border-blue-500' },
-        'info-ggp': { title:'Grumpy Goat Pizza (GGP) - The Operator', text: `
-          <p class="mb-3"><span class="chaos">Without:</span> GGP owns truck, building, loan. One accident could bankrupt the lot.</p>
-          <p><span class="system">With:</span> GGP focuses on selling pizza; pays rent (MOHV) & loan (GGCG). Risk isolated.</p>`, color:'border-slate-500' },
-        'info-cng': { title:'Crumb n Get It (CNG) - The Operator', text: `
-          <p class="mb-3"><span class="chaos">Without:</span> Mixed accounts with GGP; GGP lawsuit could seize ovens and cash.</p>
-          <p><span class="system">With:</span> Protected operator silo under IE. Success stands on its own.</p>`, color:'border-slate-500' },
-        'info-ffc': { title:'Fulcrum Fortress (FFC) - Shared Support', text: `
-          <p class="mb-3"><span class="chaos">Without:</span> Each team reinvents the wheel—duplicated mistakes & messy books.</p>
-          <p><span class="system">With:</span> One playbook. Solve once; share always. Quality and efficiency compounded.</p>`, color:'border-slate-500' },
-        'info-mohv': { title:'My Okie Heart (MOHV) - Allied Landlord', text: `
-          <p class="mb-3"><span class="chaos">Without:</span> Building/truck trapped in GGP risk.</p>
-          <p><span class="system">With:</span> Holds assets safely separate; benefit is total insulation from IE/GGP lawsuits.</p>`, color:'border-amber-400' },
-        'info-ggcg': { title:'Grumpy Goat Capital (GGCG) - Allied Bank', text: `
-          <p class="mb-3"><span class="chaos">Without:</span> Bank loan on IE/GGP; default cascades risk group-wide.</p>
-          <p><span class="system">With:</span> Debt isolated; catastrophic ops issues don’t nuke banking relationship.</p>`, color:'border-indigo-400' },
-        'default': { title:'A System for Stability', text:'Click an entity above to see its role and value.', color:'border-slate-700' }
+const infoContent = {
+  'info-ie': {
+    title: 'Infinite Earth (IE) — The Parent (6 Members)',
+    text: `
+      <p class="mb-3"><span class="chaos">Without the system:</span> One giant, messy LLC. Cross-contamination of cash and risk. One dispute derails everything.</p>
+      <p><span class="system">With the system:</span> IE is the shield and the steering wheel. Members get a personal + inter-business shield; the Board sets guardrails and operators execute within them.</p>
+    `,
+    color: 'border-blue-500'
+  },
+  'info-ggp': {
+    title: 'Grumpy Goat Pizza (GGP) — The Operator',
+    text: `
+      <p class="mb-3"><span class="chaos">Without the system:</span> GGP owns the truck/building/loan. A single accident can take the whole shop and brand with it.</p>
+      <p><span class="system">With the system:</span> GGP focuses only on selling pizza. Pays <em>rent</em> (MOHV) and <em>loan</em> (GGCG). Risk is isolated; operations stay fast.</p>
+    `,
+    color: 'border-slate-500'
+  },
+  'info-cng': {
+    title: 'Crumb n Get It (CNG) — The Operator',
+    text: `
+      <p class="mb-3"><span class="chaos">Without the system:</span> Money mixes with GGP; a GGP claim can seize CNG cash and ovens.</p>
+      <p><span class="system">With the system:</span> CNG runs in its own protected lane under IE. Success isn’t punished by someone else’s risk.</p>
+    `,
+    color: 'border-slate-500'
+  },
+  'info-ffc': {
+    title: 'Fulcrum Fortress (FFC) — Shared Support',
+    text: `
+      <p class="mb-3"><span class="chaos">Without the system:</span> Each company reinvents bookkeeping, ops, and hiring. Inconsistent quality and duplicated effort.</p>
+      <p><span class="system">With the system:</span> Solve once, share always. FFC standardizes finance, HR, ops playbooks, and tooling via MSA.</p>
+    `,
+    color: 'border-slate-500'
+  },
+  'info-mohv': {
+    title: 'My Okie Heart (MOHV) — Allied Landlord',
+    text: `
+      <p class="mb-3"><span class="chaos">Without the system:</span> Hard assets sit inside ops; lawsuits can seize the building/truck.</p>
+      <p><span class="system">With the system:</span> MOHV owns the building/truck and leases to operators. It’s outside IE—an extra wall of protection around the crown jewels.</p>
+    `,
+    color: 'border-amber-400'
+  },
+  'info-ggcg': {
+    title: 'Grumpy Goat Capital (GGCG) — Allied Bank',
+    text: `
+      <p class="mb-3"><span class="chaos">Without the system:</span> Debt sits on IE/GGP; a default or claim can cascade through the stack.</p>
+      <p><span class="system">With the system:</span> GGCG isolates borrowing and formal intercompany loans. Banks see clean risk compartments; the group keeps flexibility.</p>
+    `,
+    color: 'border-indigo-400'
+  },
+  'default': {
+    title: 'A System for Stability',
+    text: `
+      Click a tile to see its role. The fortress creates clean, arm’s-length flows (rent, loans, MSAs), isolates risk, and keeps decisions crisp.
+    `,
+    color: 'border-slate-700'
+  }
+};
+}
       };
       function setInfo(id){
         const c = infoContent[id] || infoContent.default;
