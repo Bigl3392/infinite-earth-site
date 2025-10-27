@@ -1,0 +1,30 @@
+﻿name: Build & Ship Static Site
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build-ship:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install deps
+        run: |
+          npm ci || npm i -D tailwindcss postcss autoprefixer
+      - name: Build CSS + inject bundle token
+        run: |
+          TS=
+          OUT="assets/build.v.css"
+          npx tailwindcss -i ./src/input.css -o "./" --minify
+          sed -i.bak "s/{{CSS_BUNDLE}}/build.v.css/g" index.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - uses: actions/deploy-pages@v4
