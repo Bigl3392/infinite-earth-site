@@ -35,6 +35,10 @@ jobs:
           ./node_modules/.bin/tailwindcss -i ./src/input.css -o "./$OUT" --minify
           sed -i.bak "s|{{CSS_BUNDLE}}|$(basename "$OUT")|g" index.html
           rm -f index.html.bak
+      - name: Copy favicon to site root (for /favicon.ico hits)
+        run: |
+          set -e
+          if [ -f assets/favicon.ico ]; then cp -f assets/favicon.ico ./; fi
 
 
       - name: Configure Pages
