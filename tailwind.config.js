@@ -1,6 +1,6 @@
-﻿/** @type {import('tailwindcss').Config} */
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./index.html","./immersive-enhancements.js"],
+  content: ["./index.html", "./immersive-enhancements.js"],
   theme: { extend: {} },
-  plugins: [],
-}
+  plugins: []
+};
